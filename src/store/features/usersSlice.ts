@@ -1,12 +1,22 @@
-import React from "react";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
+// app/lib/features/users/usersSlice.ts
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { User } from "../../lib/definitions";
-import DashboardHeader from "../../components/dashboard/dashboardHeader";
 
-async function getData(): Promise<User[]> {
-  // Fetch data from your API here.
-  return [
+interface UsersState {
+  users: User[];
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: UsersState = {
+  users: [],
+  loading: false,
+  error: null,
+};
+
+export const fetchUsers = createAsyncThunk("users/fetchUsers", async () => {
+  // Simulated API call - replace with actual fetch to your backend
+  const mockUsers: User[] = [
     {
       id: "728ed52f",
       created_at: new Date().toDateString(),
@@ -129,15 +139,28 @@ async function getData(): Promise<User[]> {
     },
     // ...
   ];
-}
+  return mockUsers;
+});
 
-export default async function DemoPage() {
-  const data = await getData();
+const usersSlice = createSlice({
+  name: "users",
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.users = action.payload;
+      })
+      .addCase(fetchUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch users";
+      });
+  },
+});
 
-  return (
-    <div className="container mx-auto py-10">
-      <DashboardHeader />
-      <DataTable columns={columns} data={data} />
-    </div>
-  );
-}
+export default usersSlice.reducer;

@@ -1,5 +1,6 @@
+import React from "react";
 import Counter from "../components/Counter";
-import Link from 'next/link'
+import Link from "next/link";
 
 export default function Home() {
   return (

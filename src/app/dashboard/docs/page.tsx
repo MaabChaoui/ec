@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useAppDispatch, useAppSelector } from "../../../store/store";
-import { increment } from "../../../store/features/counterSlice";
 
 const documents = [
   { id: "1", title: "Document 1", description: "Description for Document 1" },
