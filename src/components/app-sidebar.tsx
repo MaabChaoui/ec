@@ -5,6 +5,7 @@ import {
   AudioWaveform,
   BookOpen,
   Bot,
+  FileStack,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -52,18 +53,14 @@ const data = {
   ],
   navMain: [
     {
-      title: "Playground",
+      title: "Admin Dashboard",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
+          title: "Users",
+          url: "/dashboard/users",
         },
         {
           title: "Settings",
@@ -72,66 +69,39 @@ const data = {
       ],
     },
     {
-      title: "Models",
+      title: "Documents",
       url: "#",
-      icon: Bot,
+      icon: FileStack,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "List Documents",
+          url: "/dashboard/documents",
         },
         {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
+          title: "idk",
           url: "#",
         },
       ],
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
+      title: "More",
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "General",
+          title: "Contact HR",
           url: "#",
         },
         {
-          title: "Team",
+          title: "Reset your password",
           url: "#",
         },
         {
-          title: "Billing",
+          title: "About",
           url: "#",
         },
         {
-          title: "Limits",
+          title: "Corporate Policy",
           url: "#",
         },
       ],

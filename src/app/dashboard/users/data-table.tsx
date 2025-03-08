@@ -1,5 +1,8 @@
 "use client";
 import React from "react";
+
+import { useDispatch, useSelector } from "react-redux";
+
 import {
   ColumnDef,
   flexRender,
@@ -15,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import {
   Dialog,
   DialogContent,
@@ -22,6 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import {
   Pagination,
   PaginationContent,
@@ -33,7 +38,9 @@ import {
 } from "@/components/ui/pagination";
 
 import { Input } from "@/components/ui/input";
+
 import { Button } from "@/components/ui/button";
+
 import {
   Select,
   SelectContent,
@@ -41,7 +48,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import { Separator } from "@/components/ui/separator";
+
+import { Skeleton } from "@/components/ui/skeleton";
+
+import { fetchUsers } from "../../../store/features/usersSlice";
 
 // User type as defined by your schema.
 export type User = {
@@ -58,12 +70,24 @@ export type User = {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  isLoading?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  isLoading,
 }: DataTableProps<TData, TValue>) {
+  const dispatch = useDispatch();
+  const { currentPage, totalPages, searchTerm } = useSelector(
+    (state) => state.users,
+  );
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    dispatch(fetchUsers({ page: newPage, perPage: 5, searchTerm: searchTerm }));
+  };
+
   const table = useReactTable({
     data,
     columns,
@@ -71,7 +95,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="rounded-md border min-h-[800px] flex flex-col">
+    <div className="rounded-md border min-h-[400px] flex flex-col">
       <div className="flex-1 overflow-auto">
         <Table>
           <TableHeader className="bg-sidebar">
@@ -91,7 +115,20 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              // Loading skeleton
+              Array(5)
+                .fill(0)
+                .map((_, index) => (
+                  <TableRow key={`skeleton-${index}`}>
+                    {columns.map((column, colIndex) => (
+                      <TableCell key={`skeleton-cell-${index}-${colIndex}`}>
+                        <Skeleton className="h-4 w-[80%]" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 // Assume the row's original data is of type User.
                 const user = row.original as User;
@@ -262,16 +299,38 @@ export function DataTable<TData, TValue>({
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" />
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!isLoading) handlePageChange(currentPage - 1);
+                  }}
+                  className={
+                    currentPage === 1 || isLoading
+                      ? "opacity-50 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
+                />
               </PaginationItem>
               <PaginationItem>
-                <PaginationLink href="#">1</PaginationLink>
+                <PaginationLink isActive>{currentPage}</PaginationLink>
               </PaginationItem>
               <PaginationItem>
-                <PaginationEllipsis />
+                <span className="mx-2">of {totalPages}</span>
               </PaginationItem>
               <PaginationItem>
-                <PaginationNext href="#" />
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!isLoading) handlePageChange(currentPage + 1);
+                  }}
+                  className={
+                    currentPage === totalPages || isLoading
+                      ? "opacity-50 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
+                />
               </PaginationItem>
             </PaginationContent>
           </Pagination>

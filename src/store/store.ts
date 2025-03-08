@@ -5,12 +5,14 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import counterReducer from "./features/counterSlice";
 import authReducer from "./features/auth/authSlice";
 import usersReducer from "./features/usersSlice";
+import documentReducer from "./features/documentsSlice";
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     auth: authReducer,
     users: usersReducer,
+    documents: documentReducer,
   },
 });
 
