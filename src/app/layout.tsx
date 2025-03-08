@@ -1,3 +1,4 @@
+import React from "react";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -10,6 +11,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import BreadCrumbs from "@/components/BreadCrumbs";
 import LocaleSwitcher from "@/components/LocaleSwitcherSelect";
 import Providers from "@/components/Providers";
+import { AuthProvider } from "../providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -46,20 +48,22 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <Providers>
-            <SidebarProvider>
-              <AppSidebar />
-              <main className="w-full">
-                <div className="flex items-center gap-2 px-4">
-                  <SidebarTrigger />
-                  <Separator orientation="vertical" className="mr-2 h-4" />
-                  <ModeToggle />
-                  <Separator orientation="vertical" className="mr-2 h-4" />
-                  <LocaleSwitcher />
-                  <Separator orientation="vertical" className="mr-2 h-4" />
-                </div>
-                {children}
-              </main>
-            </SidebarProvider>
+            <AuthProvider>
+              <SidebarProvider>
+                <AppSidebar />
+                <main className="w-full">
+                  <div className="flex items-center gap-2 px-4">
+                    <SidebarTrigger />
+                    <Separator orientation="vertical" className="mr-2 h-4" />
+                    <ModeToggle />
+                    <Separator orientation="vertical" className="mr-2 h-4" />
+                    <LocaleSwitcher />
+                    <Separator orientation="vertical" className="mr-2 h-4" />
+                  </div>
+                  {children}
+                </main>
+              </SidebarProvider>
+            </AuthProvider>
           </Providers>
         </NextIntlClientProvider>
       </body>

@@ -1,15 +1,19 @@
-import Link from "next/link";
-import React from "react";
-// import { LoginForm } from "@/components/login-form";
+// app/dashboard/page.tsx
+"use client";
 
-export default function Page() {
-  return (
-    <div className="flex bold-xl flex-col italic text-xl h-screen w-full pt-20 items-center mb-5 px-4">
-      Welcome
-      <div className="w-[500px] h-[500px] border-[1px] mt-10 rounded-[5px] bg-gray-400/[0.1]"></div>
-      <Link href="/dashboard/docs" className="rounded bg-slate-500 m-4 p-4 bold not-italic duration-150 hover:scale-[105%]">
-        See docs
-      </Link>
-    </div>
-  );
+import React, { useEffect } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+// import { AppDispatch, RootState } from "../../lib/store";
+import { fetchUsers } from "../../store/features/usersSlice";
+
+export default function DemoPage() {
+  const dispatch = useAppDispatch();
+  const { users, loading, error } = useAppSelector((state) => state.users);
+
+  useEffect(() => {
+    dispatch(fetchUsers({ page: 1, perPage: 5, searchTerm: "" }));
+  }, [dispatch]);
+
+  return <div className="container mx-auto py-10">hello</div>;
 }
