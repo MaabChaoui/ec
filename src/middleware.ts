@@ -27,13 +27,21 @@ export default async function middleware(req: NextRequest) {
   console.log(path);
   console.log(path.includes("admin"));
 
-  if (isProtectedRoute && session?.role !== "admin" && path.includes("admin")) {
+  if (
+    isProtectedRoute &&
+    session?.role.toLowerCase() !== "admin" &&
+    path.includes("admin")
+  ) {
     console.log("middlewaring...");
 
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  if (isProtectedRoute && session?.role !== "admin" && path.includes("users")) {
+  if (
+    isProtectedRoute &&
+    session?.role.toLowerCase() !== "admin" &&
+    path.includes("users")
+  ) {
     console.log("middlewaring...");
 
     return NextResponse.redirect(new URL("/dashboard", req.url));

@@ -127,7 +127,7 @@ export function AppSidebar({
 }: { session: { role?: string } | null } & React.ComponentProps<
   typeof Sidebar
 >) {
-  const isAdmin = session?.role === "admin";
+  const isAdmin = session?.role.toLowerCase() === "admin";
 
   // slice off “Admin Dashboard” if not admin
   const navMain = React.useMemo(() => {

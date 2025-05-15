@@ -1,6 +1,9 @@
 export interface SessionPayload {
   id: string;
   role: string;
+  name: string;
+  email: string;
+  token: string | null;
 }
 
 export type User = {
