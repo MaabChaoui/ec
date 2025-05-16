@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
     headers: { Authorization: `Bearer ${token}` },
     // forward other headers if you need (Accept-Language, etc.)
   });
+  // console.log("/api/users: backendRes:", backendRes)
 
   if (!backendRes.ok) {
     // bubble up status & text so thunk can pick it up
@@ -33,5 +34,6 @@ export async function GET(req: NextRequest) {
   }
 
   const data = await backendRes.json();
+  console.log("/api/users: data:", data);
   return NextResponse.json(data); // same shape your React expects
 }

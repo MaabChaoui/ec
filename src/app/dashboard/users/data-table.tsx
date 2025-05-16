@@ -1,6 +1,5 @@
 "use client";
-import React from "react";
-
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -54,6 +53,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { fetchUsers } from "../../../store/features/usersSlice";
+import { updateUserAction } from "../../../actions/users/action";
 
 // User type as defined by your schema.
 export type User = {
@@ -94,6 +94,10 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
   });
 
+  // **Initialize** with the user’s current values
+  const [status, setStatus] = useState("");
+  const [role, setRole] = useState("");
+
   return (
     <div className="rounded-md border min-h-[400px] flex flex-col">
       <div className="flex-1 overflow-auto">
@@ -132,9 +136,16 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => {
                 // Assume the row's original data is of type User.
                 const user = row.original as User;
+
                 return (
                   <Dialog key={row.id}>
-                    <DialogTrigger asChild>
+                    <DialogTrigger
+                      asChild
+                      onClick={() => {
+                        setStatus(user.status);
+                        setRole(user.role);
+                      }}
+                    >
                       <TableRow
                         data-state={row.getIsSelected() && "selected"}
                         className="cursor-pointer"
@@ -157,17 +168,28 @@ export function DataTable<TData, TValue>({
                       </DialogHeader>
                       <form
                         className="space-y-4"
-                        onSubmit={(e) => {
+                        onSubmit={async (e) => {
                           e.preventDefault();
-                          // Implement your save logic here.
+                          const formData = new FormData(e.currentTarget);
+                          formData.set("role", role);
+                          formData.set("status", status);
+                          try {
+                            await updateUserAction([user], formData);
+                          } catch (err: any) {
+                            // TODO: show toast/snackbar: err.message
+                            console.error(
+                              "There was an error at updateUserAction: ",
+                              err,
+                            );
+                          }
                         }}
                       >
                         <div>
                           <label className="block text-sm font-medium">
                             ID
                           </label>
+                          <Input type="hidden" name="id" value={user.id} />
                           <Input
-                            type="text"
                             placeholder={user.id}
                             disabled
                             className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
@@ -186,19 +208,6 @@ export function DataTable<TData, TValue>({
                             className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
                           />
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Updated At
-                          </label>
-                          <Input
-                            type="text"
-                            placeholder={new Date(
-                              user.updated_at,
-                            ).toLocaleString()}
-                            disabled
-                            className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
-                          />
-                        </div>
                         <Separator />
                         <div>
                           <label className="block text-sm font-medium">
@@ -206,6 +215,7 @@ export function DataTable<TData, TValue>({
                           </label>
                           <Input
                             type="text"
+                            name="name"
                             defaultValue={user.name}
                             className="mt-1 block w-full border-gray-300 rounded-md"
                           />
@@ -216,6 +226,7 @@ export function DataTable<TData, TValue>({
                           </label>
                           <Input
                             type="email"
+                            name="email"
                             defaultValue={user.email}
                             className="mt-1 block w-full border-gray-300 rounded-md"
                           />
@@ -224,17 +235,17 @@ export function DataTable<TData, TValue>({
                           <label className="block text-sm font-medium">
                             Status
                           </label>
-                          <Select>
+                          <Select value={status} onValueChange={setStatus}>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder={user.status} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Active">Active</SelectItem>
-                              <SelectItem value="Deactivated">
-                                Deactivated
+                              <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                              <SelectItem value="DEACTIVATED">
+                                DEACTIVATED
                               </SelectItem>
-                              <SelectItem value="Suspended">
-                                Suspended
+                              <SelectItem value="SUSPENDED">
+                                SUSPENDED
                               </SelectItem>
                             </SelectContent>
                           </Select>
@@ -243,13 +254,13 @@ export function DataTable<TData, TValue>({
                           <label className="block text-sm font-medium">
                             Role
                           </label>
-                          <Select>
+                          <Select value={role} onValueChange={setRole}>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder={user.role} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="normal">Normal</SelectItem>
+                              <SelectItem value="ADMIN">ADMIN</SelectItem>
+                              <SelectItem value="USER">USER</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -260,6 +271,7 @@ export function DataTable<TData, TValue>({
                           </label>
                           <Input
                             type="password"
+                            name="password"
                             placeholder="Enter new password"
                             className="mt-1 block w-full border-gray-300 rounded-md"
                           />

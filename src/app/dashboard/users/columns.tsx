@@ -16,12 +16,12 @@ export const columns: ColumnDef<User>[] = [
     header: "Role",
   },
   {
-    accessorKey: "created_at",
-    header: "Join Date",
-  },
-  {
     accessorKey: "email",
     header: "Email",
+  },
+  {
+    accessorKey: "created_at",
+    header: "Join Date",
   },
   {
     accessorKey: "status",
