@@ -13,22 +13,15 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "name",
-    header: "Name",
+    header: "Department Name",
   },
   {
-    accessorKey: "role",
-    header: "Role",
+    accessorKey: "createdAt",
+    header: "Creation Date",
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "users_count",
+    header: "User Counts",
   },
-  {
-    accessorKey: "created_at",
-    header: "Join Date",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-  },
+  //TODO: add counts per department
 ];

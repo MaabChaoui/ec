@@ -20,7 +20,7 @@ const initialState: UsersState = {
   error: null,
   currentPage: 1,
   totalPages: 1,
-  perPage: 5,
+  perPage: 10,
   searchTerm: "",
 };
 

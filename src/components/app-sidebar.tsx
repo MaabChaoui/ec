@@ -57,6 +57,10 @@ const data = {
           url: "/dashboard/users",
         },
         {
+          title: "Departments",
+          url: "/dashboard/departments",
+        },
+        {
           title: "Settings",
           url: "#",
         },

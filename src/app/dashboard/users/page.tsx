@@ -21,7 +21,7 @@ export default function DemoPage() {
   const { users, loading, error, currentPage, totalPages, searchTerm } =
     useAppSelector((state) => state.users);
 
-  const perPage = 5;
+  const perPage = 10;
   const [localSearch, setLocalSearch] = useState("");
   const debounceTimer = useRef<NodeJS.Timeout>();
 
@@ -39,7 +39,7 @@ export default function DemoPage() {
   }, [localSearch, dispatch]);
 
   useEffect(() => {
-    dispatch(fetchUsers({ page: 1, perPage: 5, searchTerm: searchTerm }));
+    dispatch(fetchUsers({ page: 1, perPage: perPage, searchTerm: searchTerm }));
   }, [dispatch, searchTerm]);
 
   const data = [];

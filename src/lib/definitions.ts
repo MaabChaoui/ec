@@ -28,3 +28,9 @@ export type Document = {
   extension?: string;
   url?: string;
 };
+
+export type Department = {
+  id: string;
+  name: string;
+  createdAt: string | any;
+};
