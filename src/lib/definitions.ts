@@ -1,6 +1,9 @@
 export interface SessionPayload {
   id: string;
   role: string;
+  name: string;
+  email: string;
+  token: string | null;
 }
 
 export type User = {
@@ -24,4 +27,10 @@ export type Document = {
   size?: string;
   extension?: string;
   url?: string;
+};
+
+export type Department = {
+  id: string;
+  name: string;
+  createdAt: string | any;
 };

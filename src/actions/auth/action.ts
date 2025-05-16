@@ -17,38 +17,26 @@ export async function loginAction(prevState: any, formData: FormData) {
     }
 
     // Use the BACKEND_URL from environment variables
-    // const backendUrl = process.env.BACKEND_URL;
-    const backendUrl = "http://localhost:5001";
+    const backendUrl = process.env.BACKEND_URL;
+    console.log("backendUrl:", backendUrl);
+    // const backendUrl = "http://localhost:8081";
     if (!backendUrl) {
-      // throw new Error("BACKEND_URL is not defined in environment variables.");
+      throw new Error("BACKEND_URL is not defined in environment variables.");
     }
 
-    const res = await fetch(`${backendUrl}/api/auth/login`, {
+    const res = await fetch(`${backendUrl}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
+    console.log("res:", res);
     const data = await res.json();
+    console.log("data", data);
 
     if (!res.ok) {
       return { error: data.message || "Login failed", success: false };
     }
-
-    console.log("creating session...");
-    await createSession(data.user);
-    console.log("created session!");
-
-    if (data.access_token) {
-      const c = await cookies();
-      c.set({
-        name: "auth_token",
-        value: data.access_token,
-        httpOnly: true, // prevents client-side JavaScript from reading the cookie
-        secure: process.env.NODE_ENV === "production", // send cookie over HTTPS only in production
-        sameSite: "strict",
-        path: "/",
-      });
-    }
+    await createSession(data.access_token, data.user);
 
     return {
       error: null,
@@ -64,28 +52,8 @@ export async function loginAction(prevState: any, formData: FormData) {
 // logout
 export async function logoutAction(prevState: any) {
   try {
-    console.log("making logoutAction");
-    // Use the BACKEND_URL from environment variables
-    // const backendUrl = process.env.BACKEND_URL;
-    const backendUrl = "http://localhost:5001";
-    if (!backendUrl) {
-      // throw new Error("BACKEND_URL is not defined in environment variables.");
-    }
-    const c = await cookies();
-
-    const res = await fetch(`${backendUrl}/api/auth/logout`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    const r = await res.json();
-    console.log(r);
-    const token = c.get("auth_token");
-    console.log("retrieved token ", token);
-
-    c.delete("auth_token");
-
-    deleteSession();
-    // const data = await res.json();
+    // console.log("making logoutAction");
+    await deleteSession();
 
     return { error: null, success: true, token: null, user: null };
   } catch (error) {

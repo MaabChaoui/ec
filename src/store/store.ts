@@ -6,6 +6,7 @@ import counterReducer from "./features/counterSlice";
 import authReducer from "./features/auth/authSlice";
 import usersReducer from "./features/usersSlice";
 import documentReducer from "./features/documentsSlice";
+import departmentReducer from "./features/departmentsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
     auth: authReducer,
     users: usersReducer,
     documents: documentReducer,
+    departments: departmentReducer,
   },
 });
 

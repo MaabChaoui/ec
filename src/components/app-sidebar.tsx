@@ -27,7 +27,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-// This is sample data.
 const data = {
   user: {
     name: "Maab Chaoui",
@@ -36,19 +35,14 @@ const data = {
   },
   teams: [
     {
-      name: "Acme Inc",
+      name: "Ensia",
       logo: GalleryVerticalEnd,
-      plan: "Enterprise",
+      plan: "Higher School",
     },
     {
-      name: "Acme Corp.",
+      name: "Natus Vincere",
       logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      plan: "Team",
     },
   ],
   navMain: [
@@ -63,6 +57,10 @@ const data = {
           url: "/dashboard/users",
         },
         {
+          title: "Departments",
+          url: "/dashboard/departments",
+        },
+        {
           title: "Settings",
           url: "#",
         },
@@ -72,6 +70,7 @@ const data = {
       title: "Documents",
       url: "#",
       icon: FileStack,
+      isActive: true,
       items: [
         {
           title: "List Documents",
@@ -126,14 +125,29 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  session,
+  ...props
+}: { session: { role?: string } | null } & React.ComponentProps<
+  typeof Sidebar
+>) {
+  const isAdmin = session?.role.toLowerCase() === "admin";
+
+  // slice off “Admin Dashboard” if not admin
+  const navMain = React.useMemo(() => {
+    return data.navMain.filter((item) => {
+      if (item.title === "Admin Dashboard" && !isAdmin) return false;
+      return true;
+    });
+  }, [isAdmin]);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>

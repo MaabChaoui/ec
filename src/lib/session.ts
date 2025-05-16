@@ -27,14 +27,16 @@ export async function decrypt(session: string | undefined = "") {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function createSession(user: any) {
+export async function createSession(token: any, user: any) {
   console.log("createSession: ", user);
 
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const id = user.id;
   const role = user.role;
+  const name = user.name;
+  const email = user.email;
 
-  const session = await encrypt({ id, role });
+  const session = await encrypt({ id, role, name, email, token });
   const cookieStore = await cookies();
 
   cookieStore.set("session", session, {

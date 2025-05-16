@@ -2,6 +2,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { User } from "../../lib/definitions";
 import { Search } from "lucide-react";
+// import { cookies } from "next/headers";
 
 interface UsersState {
   users: User[];
@@ -19,7 +20,7 @@ const initialState: UsersState = {
   error: null,
   currentPage: 1,
   totalPages: 1,
-  perPage: 5,
+  perPage: 10,
   searchTerm: "",
 };
 
@@ -34,313 +35,37 @@ export const fetchUsers = createAsyncThunk(
     perPage: number;
     searchTerm: string;
   }) => {
-    // Simulated API call with pagination
-    // const mockUsers = [
-    const mockUsers: User[] = [
-      {
-        id: "728ed52f",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Maab Chaoui",
-        status: "Active",
-        email: "m@example.com",
-        role: "user",
-        photo: "",
-      },
-      {
-        id: "489e1d42",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Sohaib Houhou",
-        status: "Active",
-        email: "m@example.com",
-        role: "admin",
-        photo: "",
-      },
-      {
-        id: "0edawd76d",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        email: "m@example.com",
-        role: "admin",
-        name: "Fran Garcia",
-        status: "Deactivated",
-        photo: "",
-      },
-      {
-        id: "728ed52f",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Maab Chaoui",
-        status: "Active",
-        email: "m@example.com",
-        role: "user",
-        photo: "",
-      },
-      {
-        id: "489e1d42",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Sohaib Houhou",
-        status: "Active",
-        email: "m@example.com",
-        role: "admin",
-        photo: "",
-      },
-      {
-        id: "0edawd76d",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        email: "m@example.com",
-        role: "admin",
-        name: "Fran Garcia",
-        status: "Deactivated",
-        photo: "",
-      },
-      {
-        id: "728ed52f",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Maab Chaoui",
-        status: "Active",
-        email: "m@example.com",
-        role: "user",
-        photo: "",
-      },
-      {
-        id: "489e1d42",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Sohaib Houhou",
-        status: "Active",
-        email: "m@example.com",
-        role: "admin",
-        photo: "",
-      },
-      {
-        id: "0edawd76d",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        email: "m@example.com",
-        role: "admin",
-        name: "Fran Garcia",
-        status: "Deactivated",
-        photo: "",
-      },
-      {
-        id: "728ed52f",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Maab Chaoui",
-        status: "Active",
-        email: "m@example.com",
-        role: "user",
-        photo: "",
-      },
-      {
-        id: "489e1d42",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Sohaib Houhou",
-        status: "Active",
-        email: "m@example.com",
-        role: "admin",
-        photo: "",
-      },
-      {
-        id: "0edawd76d",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        email: "m@example.com",
-        role: "admin",
-        name: "Fran Garcia",
-        status: "Deactivated",
-        photo: "",
-      },
-      {
-        id: "728ed52f",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Maab Chaoui",
-        status: "Active",
-        email: "m@example.com",
-        role: "user",
-        photo: "",
-      },
-      {
-        id: "489e1d42",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Sohaib Houhou",
-        status: "Active",
-        email: "m@example.com",
-        role: "admin",
-        photo: "",
-      },
-      {
-        id: "0edawd76d",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        email: "m@example.com",
-        role: "admin",
-        name: "Fran Garcia",
-        status: "Deactivated",
-        photo: "",
-      },
-      {
-        id: "728ed52f",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Maab Chaoui",
-        status: "Active",
-        email: "m@example.com",
-        role: "user",
-        photo: "",
-      },
-      {
-        id: "489e1d42",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Sohaib Houhou",
-        status: "Active",
-        email: "m@example.com",
-        role: "admin",
-        photo: "",
-      },
-      {
-        id: "0edawd76d",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        email: "m@example.com",
-        role: "admin",
-        name: "Fran Garcia",
-        status: "Deactivated",
-        photo: "",
-      },
-      {
-        id: "728ed52f",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Maab Chaoui",
-        status: "Active",
-        email: "m@example.com",
-        role: "user",
-        photo: "",
-      },
-      {
-        id: "489e1d42",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Sohaib Houhou",
-        status: "Active",
-        email: "m@example.com",
-        role: "admin",
-        photo: "",
-      },
-      {
-        id: "728ed52f",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Maab Chaoui",
-        status: "Active",
-        email: "m@example.com",
-        role: "user",
-        photo: "",
-      },
-      {
-        id: "489e1d42",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Sohaib Houhou",
-        status: "Active",
-        email: "m@example.com",
-        role: "admin",
-        photo: "",
-      },
-      {
-        id: "0edawd76d",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        email: "m@example.com",
-        role: "admin",
-        name: "Fran Garcia",
-        status: "Deactivated",
-        photo: "",
-      },
-      {
-        id: "728ed52f",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Maab Chaoui",
-        status: "Active",
-        email: "m@example.com",
-        role: "user",
-        photo: "",
-      },
-      {
-        id: "489e1d42",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Sohaib Houhou",
-        status: "Active",
-        email: "m@example.com",
-        role: "admin",
-        photo: "",
-      },
-      {
-        id: "0edawd76d",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        email: "m@example.com",
-        role: "admin",
-        name: "Fran Garcia",
-        status: "Deactivated",
-        photo: "",
-      },
-      {
-        id: "728ed52f",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Maab Chaoui",
-        status: "Active",
-        email: "m@example.com",
-        role: "user",
-        photo: "",
-      },
-      {
-        id: "489e1d42",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        name: "Sohaib Houhou",
-        status: "Active",
-        email: "m@example.com",
-        role: "admin",
-        photo: "",
-      },
-      // ...
-    ];
-    console.log("fetch users....", searchTerm);
-    // Filter users based on search term (replace with actual API call)
-    const filteredUsers = mockUsers.filter(
-      (user) =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    const params = new URLSearchParams({
+      page: String(page),
+      perPage: String(perPage),
+      search: searchTerm,
+    });
 
-    // Simulate paginated response
-    const start = (page - 1) * perPage;
-    const end = start + perPage;
-    const paginatedUsers = filteredUsers.slice(start, end);
-    const totalPages = Math.ceil(filteredUsers.length / perPage);
+    console.log(`/api/users?${params.toString()}`);
+    // const res = await fetch(`/api/users`, {
+    const res = await fetch(`/api/users?${params.toString()}`, {
+      // sends the cookie, nothing else to add
+      credentials: "include",
+    });
 
-    // Simulate API response delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    if (!res.ok) {
+      const { message } = await res.json();
+      throw new Error(message ?? `Error ${res.status}`);
+    }
 
+    const data = await res.json(); // ← whatever shape Spring gives bac
+    console.log("dataaaaa:", data);
     return {
-      users: paginatedUsers,
-      totalPages,
-      currentPage: page,
-      perPage,
+      users: data.content ?? data.users,
+      totalPages: data.totalPages,
+      currentPage: data.number + 1 || page,
+      perPage: data.size || perPage,
+    };
+    return {
+      users: data,
+      totalPages: 1,
+      currentPage: 1,
+      perPage: 20,
     };
   },
 );

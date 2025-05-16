@@ -12,6 +12,7 @@ import BreadCrumbs from "@/components/BreadCrumbs";
 import LocaleSwitcher from "@/components/LocaleSwitcherSelect";
 import Providers from "@/components/Providers";
 import { AuthProvider } from "../providers";
+import AppSidebarContainer from "../components/AppSidebarContainer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -50,7 +51,7 @@ export default async function RootLayout({
           <Providers>
             <AuthProvider>
               <SidebarProvider>
-                <AppSidebar />
+                <AppSidebarContainer />
                 <main className="w-full">
                   <div className="flex items-center gap-2 px-4">
                     <SidebarTrigger />
