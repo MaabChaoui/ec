@@ -90,10 +90,20 @@ export default function UsersList() {
             </form>
           </DialogContent>
         </Dialog>
-
-        <Button>
-          <FolderPlus /> Upload from File
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>
+              <FolderPlus /> Upload from File
+            </Button>
+          </DialogTrigger>{" "}
+          <DialogContent className="bg-transparent backdrop-blur-lg">
+            <DialogHeader className="flex align-center justify-center">
+              <DialogTitle className="flex align-center justify-center">
+                Coming Soon
+              </DialogTitle>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

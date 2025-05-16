@@ -18,14 +18,15 @@ export async function GET(req: NextRequest) {
 
   // 2) Forward the query params (page, perPage, search, …) to Spring Boot
   const url = new URL("/api/users", BACKEND);
-  //   req.nextUrl.searchParams.forEach((v, k) => url.searchParams.append(k, v));
+  req.nextUrl.searchParams.forEach((v, k) => url.searchParams.append(k, v));
+  console.log("BACKEND url:", url.href, "\n\n\n", token);
 
   // 3) Call the backend with Authorization header
   const backendRes = await fetch(url.href, {
     headers: { Authorization: `Bearer ${token}` },
     // forward other headers if you need (Accept-Language, etc.)
   });
-  // console.log("/api/users: backendRes:", backendRes)
+  console.log("/api/users: backendRes:", backendRes);
 
   if (!backendRes.ok) {
     // bubble up status & text so thunk can pick it up

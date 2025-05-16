@@ -94,6 +94,8 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const [diagOpen, setDiagOpen] = useState(false);
+
   // **Initialize** with the user’s current values
   const [status, setStatus] = useState("");
   const [role, setRole] = useState("");
@@ -138,7 +140,11 @@ export function DataTable<TData, TValue>({
                 const user = row.original as User;
 
                 return (
-                  <Dialog key={row.id}>
+                  <Dialog
+                    key={row.id}
+                    open={diagOpen}
+                    onOpenChange={setDiagOpen}
+                  >
                     <DialogTrigger
                       asChild
                       onClick={() => {
@@ -175,6 +181,7 @@ export function DataTable<TData, TValue>({
                           formData.set("status", status);
                           try {
                             await updateUserAction([user], formData);
+                            setDiagOpen(false);
                           } catch (err: any) {
                             // TODO: show toast/snackbar: err.message
                             console.error(

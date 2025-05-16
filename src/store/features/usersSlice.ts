@@ -41,8 +41,9 @@ export const fetchUsers = createAsyncThunk(
       search: searchTerm,
     });
 
-    // const res = await fetch(`/api/users?${params.toString()}`, {
-    const res = await fetch(`/api/users`, {
+    console.log(`/api/users?${params.toString()}`);
+    // const res = await fetch(`/api/users`, {
+    const res = await fetch(`/api/users?${params.toString()}`, {
       // sends the cookie, nothing else to add
       credentials: "include",
     });
@@ -53,13 +54,13 @@ export const fetchUsers = createAsyncThunk(
     }
 
     const data = await res.json(); // ← whatever shape Spring gives bac
-    // console.log("dataaaaa:", data);
-    // return {
-    //   users: data.content ?? data.users,
-    //   totalPages: data.totalPages,
-    //   currentPage: data.number + 1 || page,
-    //   perPage: data.size || perPage,
-    // };
+    console.log("dataaaaa:", data);
+    return {
+      users: data.content ?? data.users,
+      totalPages: data.totalPages,
+      currentPage: data.number + 1 || page,
+      perPage: data.size || perPage,
+    };
     return {
       users: data,
       totalPages: 1,
