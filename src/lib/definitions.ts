@@ -7,7 +7,7 @@ export interface SessionPayload {
 }
 
 export type User = {
-  id: string;
+  id: string | number;
   created_at: Date | string | null;
   updated_at: Date | string | null;
   name: string;
@@ -15,6 +15,8 @@ export type User = {
   status: string;
   role: string; // Typically 'user' | 'admin'
   photo: string;
+
+  departmentIds: Array<number>;
 };
 
 export type Document = {
@@ -32,5 +34,6 @@ export type Document = {
 export type Department = {
   id: string;
   name: string;
-  createdAt: string | any;
+  createdAt: string | null;
+  userCount: number | null;
 };

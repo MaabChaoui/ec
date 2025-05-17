@@ -13,10 +13,13 @@ import { Button } from "../ui/button";
 import { Input } from "@/components/ui/input";
 import { SquarePlus, FolderPlus } from "lucide-react";
 import { createUserAction } from "../../actions/users/action";
+import { fetchUsers } from "../../store/features/usersSlice";
+import { useAppDispatch } from "../../store/store";
 
 export default function UsersList() {
   const [users, setUsers] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
+  const dispatch = useAppDispatch();
 
   return (
     <div className="flex flex-row justify-between my-10">
@@ -42,8 +45,9 @@ export default function UsersList() {
 
                 try {
                   const updated = await createUserAction(users, formData);
-                  setUsers(updated);
+                  // setUsers(updated);
                   setOpen(false); // close dialog
+                  dispatch(fetchUsers({ page: 1, perPage: 5, searchTerm: "" }));
                 } catch (err) {
                   console.error(err);
                   // TODO: show a toast/snackbar

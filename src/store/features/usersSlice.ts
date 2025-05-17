@@ -70,6 +70,24 @@ export const fetchUsers = createAsyncThunk(
   },
 );
 
+export const assignDepartments = createAsyncThunk<
+  User, // returned user
+  { id: number; deptIds: number[] },
+  { rejectValue: string }
+>("users/assignDepartments", async ({ id, deptIds }, thunkAPI) => {
+  const res = await fetch(`/api/users/${id}/assign-departments`, {
+    method: "PUT",
+    credentials: "include",
+    body: JSON.stringify(deptIds),
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const { message } = await res.json().catch(() => ({}));
+    return thunkAPI.rejectWithValue(message ?? `Error ${res.status}`);
+  }
+  return (await res.json()) as User;
+});
+
 const usersSlice = createSlice({
   name: "users",
   initialState,

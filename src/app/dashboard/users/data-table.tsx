@@ -1,5 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useState } from "react";
+
+// import { useAppSelector } from "@/store/store";       // instead of bare useSelector
+import { Checkbox } from "@/components/ui/checkbox"; // shadcn checkbox
+// import { assignDepartments, unassignDepartments } from "../../../store/features/usersSlice";
+import { assignDepartments } from "../../../store/features/usersSlice";
+
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -55,17 +62,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fetchUsers } from "../../../store/features/usersSlice";
 import { updateUserAction } from "../../../actions/users/action";
 
-// User type as defined by your schema.
-export type User = {
-  id: string;
-  created_at: Date;
-  updated_at: Date;
-  name: string;
-  email: string;
-  status: string;
-  role: string; // Typically 'user' | 'admin'
-  photo: string;
-};
+import { User } from "../../../lib/definitions";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -96,11 +93,21 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const [diagOpen, setDiagOpen] = useState(false);
+  // const [diagOpen, setDiagOpen] = useState(false);
 
   // **Initialize** with the user’s current values
   const [status, setStatus] = useState("");
   const [role, setRole] = useState("");
+
+  // departments list from the slice
+  const allDepts = useSelector((state: any) => state.departments.departments);
+  useEffect(() => {
+    console.log("allDepts:", allDepts);
+  }, [allDepts]);
+  // Track the checkbox selection
+  const [deptIds, setDeptIds] = useState<number[]>([]);
+
+  const [selected, setSelected] = useState<User | null>(null);
 
   return (
     <div className="rounded-md border min-h-[400px] flex flex-col">
@@ -140,165 +147,29 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => {
                 // Assume the row's original data is of type User.
                 const user = row.original as User;
-
+                // console.log("ROW:", row);
                 return (
-                  <Dialog
+                  <TableRow
                     key={row.id}
-                    open={diagOpen}
-                    onOpenChange={setDiagOpen}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="cursor-pointer"
+                    onClick={(e: any) => {
+                      e.preventDefault();
+                      setSelected(user);
+                      setDeptIds(user.departmentIds);
+                      setStatus(user.status);
+                      setRole(user.role);
+                    }}
                   >
-                    <DialogTrigger
-                      asChild
-                      onClick={() => {
-                        setStatus(user.status);
-                        setRole(user.role);
-                      }}
-                    >
-                      <TableRow
-                        data-state={row.getIsSelected() && "selected"}
-                        className="cursor-pointer"
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </DialogTrigger>
-                    <DialogContent className="bg-transparent backdrop-blur-lg">
-                      <DialogHeader className="flex justify-center">
-                        <DialogTitle className="flex justify-center">
-                          Edit User
-                        </DialogTitle>
-                      </DialogHeader>
-                      <form
-                        className="space-y-4"
-                        onSubmit={async (e) => {
-                          e.preventDefault();
-                          const formData = new FormData(e.currentTarget);
-                          formData.set("role", role);
-                          formData.set("status", status);
-                          try {
-                            await updateUserAction([user], formData);
-                            setDiagOpen(false);
-                          } catch (err: any) {
-                            // TODO: show toast/snackbar: err.message
-                            console.error(
-                              "There was an error at updateUserAction: ",
-                              err,
-                            );
-                          }
-                        }}
-                      >
-                        <div>
-                          <label className="block text-sm font-medium">
-                            ID
-                          </label>
-                          <Input type="hidden" name="id" value={user.id} />
-                          <Input
-                            placeholder={user.id}
-                            disabled
-                            className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Created At
-                          </label>
-                          <Input
-                            type="text"
-                            placeholder={new Date(
-                              user.created_at,
-                            ).toLocaleString()}
-                            disabled
-                            className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
-                          />
-                        </div>
-                        <Separator />
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Name
-                          </label>
-                          <Input
-                            type="text"
-                            name="name"
-                            defaultValue={user.name}
-                            className="mt-1 block w-full border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Email
-                          </label>
-                          <Input
-                            type="email"
-                            name="email"
-                            defaultValue={user.email}
-                            className="mt-1 block w-full border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Status
-                          </label>
-                          <Select value={status} onValueChange={setStatus}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder={user.status} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="ACTIVE">ACTIVE</SelectItem>
-                              <SelectItem value="DEACTIVATED">
-                                DEACTIVATED
-                              </SelectItem>
-                              <SelectItem value="SUSPENDED">
-                                SUSPENDED
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Role
-                          </label>
-                          <Select value={role} onValueChange={setRole}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder={user.role} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="ADMIN">ADMIN</SelectItem>
-                              <SelectItem value="USER">USER</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <Separator />
-                        <div className="mb-6">
-                          <label className="block text-sm font-medium">
-                            New Password
-                          </label>
-                          <Input
-                            type="password"
-                            name="password"
-                            placeholder="Enter new password"
-                            className="mt-1 block w-full border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <div className="flex justify-center gap-2 pt-10">
-                          <Button
-                            type="button"
-                            className="px-4 py-2 rounded bg-background text-foreground border hover:bg-gray-100 hover:text-gray-700"
-                          >
-                            Cancel
-                          </Button>
-                          <Button type="submit" className="px-4 py-2">
-                            Save
-                          </Button>
-                        </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
                 );
               })
             ) : (
@@ -357,6 +228,174 @@ export function DataTable<TData, TValue>({
           </Pagination>
         </div>
       </div>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="bg-transparent backdrop-blur-lg">
+          <DialogHeader className="flex justify-center">
+            <DialogTitle className="flex justify-center">
+              Edit User {selected?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+
+              formData.set("role", role);
+              formData.set("status", status);
+              formData.set("departments", JSON.stringify(deptIds));
+              console.log("SUBMITTING FORM: ", { deptIds, status, role });
+              try {
+                await updateUserAction(selected ? [selected] : null, formData);
+                // setDiagOpen(false);
+                setSelected(null);
+                dispatch(
+                  fetchUsers({
+                    page: 1,
+                    perPage: 10,
+                    searchTerm: "",
+                  }),
+                );
+              } catch (err: any) {
+                // TODO: show toast/snackbar: err.message
+                console.error("There was an error at updateUserAction: ", err);
+              }
+            }}
+          >
+            <div>
+              <label className="block text-sm font-medium">ID</label>
+              <Input type="hidden" name="id" value={selected?.id} />
+              <Input
+                placeholder={selected?.id}
+                disabled
+                className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Created At</label>
+              <Input
+                type="text"
+                placeholder={new Date(
+                  selected?.created_at ?? "",
+                ).toLocaleString()}
+                disabled
+                className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
+              />
+            </div>
+            <Separator />
+            <div>
+              <label className="block text-sm font-medium">Name</label>
+              <Input
+                type="text"
+                name="name"
+                defaultValue={selected?.name}
+                className="mt-1 block w-full border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Email</label>
+              <Input
+                type="email"
+                name="email"
+                defaultValue={selected?.email}
+                className="mt-1 block w-full border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Status</label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={selected?.status} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                  <SelectItem value="DEACTIVATED">DEACTIVATED</SelectItem>
+                  <SelectItem value="SUSPENDED">SUSPENDED</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Role</label>
+              <Select value={role} onValueChange={setRole}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={selected?.role} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ADMIN">ADMIN</SelectItem>
+                  <SelectItem value="USER">USER</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Departments
+              </label>
+
+              <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
+                {allDepts.map((dep) => {
+                  const checked = deptIds.includes(dep.id);
+                  return (
+                    <div key={dep.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`dep-${dep.id}`}
+                        checked={checked}
+                        onCheckedChange={(c: boolean) => {
+                          setDeptIds((prev) =>
+                            c
+                              ? [...prev, dep.id]
+                              : prev.filter((id) => id !== dep.id),
+                          );
+                        }}
+                      />
+                      <label htmlFor={`dep-${dep.id}`} className="text-sm">
+                        {dep.name}
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <Separator />
+            <div className="mb-6">
+              <label className="block text-sm font-medium">New Password</label>
+              <Input
+                type="password"
+                name="password"
+                placeholder="Enter new password"
+                className="mt-1 block w-full border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="flex justify-center gap-2 pt-10">
+              <Button
+                type="button"
+                className="px-4 py-2 rounded bg-background text-foreground border hover:bg-gray-100 hover:text-gray-700"
+                onClick={() => {
+                  setSelected(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log("selected: ", selected);
+                  console.log("deptIds", deptIds);
+                  console.log("status", status);
+                  console.log("role", role);
+                }}
+              >
+                log
+              </Button>
+              <Button type="submit" className="px-4 py-2">
+                Save
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -52,8 +53,6 @@ import { Separator } from "@/components/ui/separator";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { fetchUsers } from "../../../store/features/usersSlice";
-import { updateUserAction } from "../../../actions/users/action";
 import { fetchDepartments } from "../../../store/features/departmentsSlice";
 import { Department } from "../../../lib/definitions";
 
@@ -84,11 +83,7 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const [diagOpen, setDiagOpen] = useState(false);
-
-  // **Initialize** with the user’s current values
-  const [status, setStatus] = useState("");
-  const [role, setRole] = useState("");
+  const [selected, setSelected] = useState<Department | null>(null);
 
   return (
     <div className="rounded-md border min-h-[400px] flex flex-col">
@@ -127,110 +122,26 @@ export function DataTable<TData, TValue>({
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 // Assume the row's original data is of type User.
-                const user = row.original as Department;
+                const dep = row.original as Department;
 
                 return (
-                  <Dialog
+                  <TableRow
                     key={row.id}
-                    open={diagOpen}
-                    onOpenChange={setDiagOpen}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setSelected(dep);
+                    }}
                   >
-                    <DialogTrigger
-                      asChild
-                      onClick={() => {
-                        // setStatus(user.status);
-                        // setRole(user.role);
-                      }}
-                    >
-                      <TableRow
-                        data-state={row.getIsSelected() && "selected"}
-                        className="cursor-pointer"
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </DialogTrigger>
-                    <DialogContent className="bg-transparent backdrop-blur-lg">
-                      <DialogHeader className="flex justify-center">
-                        <DialogTitle className="flex justify-center">
-                          Edit Department
-                        </DialogTitle>
-                      </DialogHeader>
-                      <form
-                        className="space-y-4"
-                        onSubmit={async (e) => {
-                          e.preventDefault();
-                          const formData = new FormData(e.currentTarget);
-                          formData.set("role", role);
-                          formData.set("status", status);
-                          try {
-                            await updateUserAction([user], formData);
-                            setDiagOpen(false);
-                          } catch (err: any) {
-                            // TODO: show toast/snackbar: err.message
-                            console.error(
-                              "There was an error at updateUserAction: ",
-                              err,
-                            );
-                          }
-                        }}
-                      >
-                        <div>
-                          <label className="block text-sm font-medium">
-                            ID
-                          </label>
-                          <Input type="hidden" name="id" value={user.id} />
-                          <Input
-                            placeholder={user.id}
-                            disabled
-                            className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Created At
-                          </label>
-                          <Input
-                            type="text"
-                            placeholder={new Date(
-                              user.created_at,
-                            ).toLocaleString()}
-                            disabled
-                            className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
-                          />
-                        </div>
-                        <Separator />
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Name
-                          </label>
-                          <Input
-                            type="text"
-                            name="name"
-                            defaultValue={user.name}
-                            className="mt-1 block w-full border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <div className="flex justify-center gap-2 pt-10">
-                          <Button
-                            type="button"
-                            className="px-4 py-2 rounded bg-background text-foreground border hover:bg-gray-100 hover:text-gray-700"
-                          >
-                            Cancel
-                          </Button>
-                          <Button type="submit" className="px-4 py-2">
-                            Save
-                          </Button>
-                        </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
                 );
               })
             ) : (
@@ -289,6 +200,82 @@ export function DataTable<TData, TValue>({
           </Pagination>
         </div>
       </div>
+      {/* <Dialog key={row.id} open={diagOpen} onOpenChange={setDiagOpen}> */}
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        {selected && (
+          <DialogContent className="bg-transparent backdrop-blur-lg">
+            <DialogHeader className="flex justify-center">
+              <DialogTitle className="flex justify-center">
+                Edit Department
+              </DialogTitle>
+            </DialogHeader>
+            <form
+              className="space-y-4"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                // const formData = new FormData(e.currentTarget);
+                // formData.set("role", role);
+                // formData.set("status", status);
+                try {
+                  // await updateUserAction([dep], formData);
+                  setSelected(null);
+                } catch (err: any) {
+                  // TODO: show toast/snackbar: err.message
+                  console.error(
+                    "There was an error at updateUserAction: ",
+                    err,
+                  );
+                }
+              }}
+            >
+              <div>
+                <label className="block text-sm font-medium">ID</label>
+                <Input type="hidden" name="id" value={selected.id} />
+                <Input
+                  placeholder={selected.id}
+                  disabled
+                  className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Created At</label>
+                <Input
+                  type="text"
+                  placeholder={new Date(
+                    selected.createdAt ?? "",
+                  ).toLocaleString()}
+                  disabled
+                  className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
+                />
+              </div>
+              <Separator />
+              <div>
+                <label className="block text-sm font-medium">Name</label>
+                <Input
+                  type="text"
+                  name="name"
+                  defaultValue={selected.name}
+                  className="mt-1 block w-full border-gray-300 rounded-md"
+                />
+              </div>
+              <div className="flex justify-center gap-2 pt-10">
+                <Button
+                  type="button"
+                  className="px-4 py-2 rounded bg-background text-foreground border hover:bg-gray-100 hover:text-gray-700"
+                  onClick={() => {
+                    setSelected(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="px-4 py-2">
+                  Save
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   );
 }
