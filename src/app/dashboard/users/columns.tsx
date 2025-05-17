@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 import { User } from "../../../lib/definitions";
+import { formatDate } from "../../../lib/utils";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -26,6 +27,10 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "created_at",
     header: "Join Date",
+    cell: ({ row }) => {
+      const value: string = row.getValue("created_at");
+      return formatDate(value);
+    },
   },
   {
     accessorKey: "status",

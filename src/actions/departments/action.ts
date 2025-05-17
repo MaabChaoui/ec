@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { cookies } from "next/headers";
 import { decrypt } from "../../lib/session";
-import { User } from "../../lib/definitions";
 
 export async function createDepartmentAction(
   prevState: any[],

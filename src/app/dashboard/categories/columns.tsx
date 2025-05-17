@@ -14,7 +14,7 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "name",
-    header: "Department Name",
+    header: "Category",
   },
   {
     accessorKey: "createdAt",
@@ -24,9 +24,5 @@ export const columns: ColumnDef<User>[] = [
       return formatDate(value);
     },
   },
-  {
-    accessorKey: "users_count",
-    header: "User Counts",
-  },
-  //TODO: add counts per department
+  //TODO: add counts per category
 ];

@@ -77,8 +77,8 @@ const data = {
           url: "/dashboard/documents",
         },
         {
-          title: "idk",
-          url: "#",
+          title: "Categories",
+          url: "/dashboard/categories",
         },
       ],
     },

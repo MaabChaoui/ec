@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
-// import { useAppSelector } from "@/store/store";       // instead of bare useSelector
-import { Checkbox } from "@/components/ui/checkbox"; // shadcn checkbox
-// import { assignDepartments, unassignDepartments } from "../../../store/features/usersSlice";
-import { assignDepartments } from "../../../store/features/usersSlice";
-
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -59,10 +53,10 @@ import { Separator } from "@/components/ui/separator";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { fetchUsers } from "../../../store/features/usersSlice";
-import { updateUserAction } from "../../../actions/users/action";
-
-import { User } from "../../../lib/definitions";
+import { fetchDepartments } from "../../../store/features/departmentsSlice";
+import { Category, Department } from "../../../lib/definitions";
+import { fetchCategories } from "../../../store/features/categoriesSlice";
+import { formatDate } from "../../../lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -82,9 +76,7 @@ export function DataTable<TData, TValue>({
 
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
-    dispatch(
-      fetchUsers({ page: newPage, perPage: 10, searchTerm: searchTerm }),
-    );
+    dispatch(fetchCategories());
   };
 
   const table = useReactTable({
@@ -93,21 +85,7 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // const [diagOpen, setDiagOpen] = useState(false);
-
-  // **Initialize** with the user’s current values
-  const [status, setStatus] = useState("");
-  const [role, setRole] = useState("");
-
-  // departments list from the slice
-  const allDepts = useSelector((state: any) => state.departments.departments);
-  useEffect(() => {
-    console.log("allDepts:", allDepts);
-  }, [allDepts]);
-  // Track the checkbox selection
-  const [deptIds, setDeptIds] = useState<number[]>([]);
-
-  const [selected, setSelected] = useState<User | null>(null);
+  const [selected, setSelected] = useState<Category | null>(null);
 
   return (
     <div className="rounded-md border min-h-[400px] flex flex-col">
@@ -146,19 +124,15 @@ export function DataTable<TData, TValue>({
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 // Assume the row's original data is of type User.
-                const user = row.original as User;
-                // console.log("ROW:", row);
+                const dep = row.original as Category;
+
                 return (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     className="cursor-pointer"
-                    onClick={(e: any) => {
-                      e.preventDefault();
-                      setSelected(user);
-                      setDeptIds(user.departmentIds);
-                      setStatus(user.status);
-                      setRole(user.role);
+                    onClick={() => {
+                      setSelected(dep);
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -228,39 +202,24 @@ export function DataTable<TData, TValue>({
           </Pagination>
         </div>
       </div>
-
+      {/* <Dialog key={row.id} open={diagOpen} onOpenChange={setDiagOpen}> */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         {selected && (
           <DialogContent className="bg-transparent backdrop-blur-lg">
             <DialogHeader className="flex justify-center">
               <DialogTitle className="flex justify-center">
-                Edit User {selected?.name}
+                Edit Category
               </DialogTitle>
             </DialogHeader>
             <form
               className="space-y-4"
               onSubmit={async (e) => {
                 e.preventDefault();
-                const formData = new FormData(e.currentTarget);
+                // TODO
 
-                formData.set("role", role);
-                formData.set("status", status);
-                formData.set("departments", JSON.stringify(deptIds));
-                console.log("SUBMITTING FORM: ", { deptIds, status, role });
                 try {
-                  await updateUserAction(
-                    selected ? [selected] : null,
-                    formData,
-                  );
-                  // setDiagOpen(false);
+                  // await updateUserAction([dep], formData);
                   setSelected(null);
-                  dispatch(
-                    fetchUsers({
-                      page: 1,
-                      perPage: 10,
-                      searchTerm: "",
-                    }),
-                  );
                 } catch (err: any) {
                   // TODO: show toast/snackbar: err.message
                   console.error(
@@ -272,9 +231,9 @@ export function DataTable<TData, TValue>({
             >
               <div>
                 <label className="block text-sm font-medium">ID</label>
-                <Input type="hidden" name="id" value={selected?.id} />
+                <Input type="hidden" name="id" value={selected.id} />
                 <Input
-                  placeholder={selected?.id}
+                  placeholder={selected.id}
                   disabled
                   className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
                 />
@@ -283,9 +242,10 @@ export function DataTable<TData, TValue>({
                 <label className="block text-sm font-medium">Created At</label>
                 <Input
                   type="text"
-                  placeholder={new Date(
-                    selected?.created_at ?? "",
-                  ).toLocaleString()}
+                  // placeholder={new Date(
+                  //   selected.createdAt ?? ""
+                  // ).toLocaleString()}
+                  placeholder={formatDate(selected.createdAt ?? "")}
                   disabled
                   className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
                 />
@@ -296,84 +256,7 @@ export function DataTable<TData, TValue>({
                 <Input
                   type="text"
                   name="name"
-                  defaultValue={selected?.name}
-                  className="mt-1 block w-full border-gray-300 rounded-md"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">Email</label>
-                <Input
-                  type="email"
-                  name="email"
-                  defaultValue={selected?.email}
-                  className="mt-1 block w-full border-gray-300 rounded-md"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">Status</label>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={selected?.status} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">ACTIVE</SelectItem>
-                    <SelectItem value="DEACTIVATED">DEACTIVATED</SelectItem>
-                    <SelectItem value="SUSPENDED">SUSPENDED</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium">Role</label>
-                <Select value={role} onValueChange={setRole}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={selected?.role} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ADMIN">ADMIN</SelectItem>
-                    <SelectItem value="USER">USER</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Departments
-                </label>
-
-                <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
-                  {allDepts.map((dep) => {
-                    const checked = deptIds.includes(dep.id);
-                    return (
-                      <div key={dep.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`dep-${dep.id}`}
-                          checked={checked}
-                          onCheckedChange={(c: boolean) => {
-                            setDeptIds((prev) =>
-                              c
-                                ? [...prev, dep.id]
-                                : prev.filter((id) => id !== dep.id),
-                            );
-                          }}
-                        />
-                        <label htmlFor={`dep-${dep.id}`} className="text-sm">
-                          {dep.name}
-                        </label>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <Separator />
-              <div className="mb-6">
-                <label className="block text-sm font-medium">
-                  New Password
-                </label>
-                <Input
-                  type="password"
-                  name="password"
-                  placeholder="Enter new password"
+                  defaultValue={selected.name}
                   className="mt-1 block w-full border-gray-300 rounded-md"
                 />
               </div>
@@ -386,17 +269,6 @@ export function DataTable<TData, TValue>({
                   }}
                 >
                   Cancel
-                </Button>
-                <Button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    console.log("selected: ", selected);
-                    console.log("deptIds", deptIds);
-                    console.log("status", status);
-                    console.log("role", role);
-                  }}
-                >
-                  log
                 </Button>
                 <Button type="submit" className="px-4 py-2">
                   Save

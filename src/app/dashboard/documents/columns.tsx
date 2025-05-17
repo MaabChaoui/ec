@@ -6,11 +6,13 @@ import { Document } from "@/lib/features/documents/documentTypes";
 import { File, Folder } from "lucide-react";
 import { formatBytes, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export const columns: ColumnDef<Document>[] = [
+  { accessorKey: "id", header: "ID" },
   {
-    accessorKey: "name",
-    header: "Name",
+    accessorKey: "title",
+    header: "Title",
     cell: ({ row }) => {
       const document = row.original;
       return (
@@ -20,11 +22,12 @@ export const columns: ColumnDef<Document>[] = [
           ) : (
             <File className="h-5 w-5 text-blue-500" />
           )}
-          <span className="font-medium">{document.name}</span>
+          <span className="font-medium">{document.title}</span>
         </div>
       );
     },
   },
+
   {
     accessorKey: "type",
     header: "Type",
@@ -32,7 +35,7 @@ export const columns: ColumnDef<Document>[] = [
       const document = row.original;
       return document.type === "folder"
         ? "Folder"
-        : document.fileType?.toUpperCase();
+        : (document.fileType?.toUpperCase() ?? "-");
     },
   },
   {
@@ -44,18 +47,61 @@ export const columns: ColumnDef<Document>[] = [
     },
   },
   {
-    accessorKey: "items",
-    header: "Items",
+    accessorKey: "department",
+    header: "Department",
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
+  },
+  {
+    accessorKey: "creationDate",
+    header: "Creation Date",
     cell: ({ row }) => {
-      const document = row.original;
-      return document.type === "folder" ? `${document.items} items` : "-";
+      const value: string = row.getValue("creationDate");
+      return formatDate(value);
     },
   },
   {
-    accessorKey: "updatedAt",
-    header: "Last Modified",
-    cell: ({ row }) => formatDate(row.getValue("updatedAt")),
+    accessorKey: "createdBy",
+    header: "Creator",
   },
+  {
+    accessorKey: "status",
+    header: "Status",
+  },
+  {
+    accessorKey: "downloadUrl",
+    header: "Download",
+    cell: ({ getValue }) => {
+      const url = getValue<string>();
+      const handleDownload = async () => {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        // derive a sensible filename from the URL
+        const parts = url.split("/").pop()?.split("?")[0];
+        a.download = parts ?? "download";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      };
+      return (
+        <button
+          onClick={handleDownload}
+          className="inline-flex p-1 hover:bg-muted rounded"
+        >
+          <Download className="h-5 w-5 text-blue-600" />
+        </button>
+      );
+    },
+  },
+  // {
+  //   accessorKey: "updatedAt",
+  //   header: "Last Modified",
+  //   cell: ({ row }) => formatDate(row.getValue("updatedAt")),
+  // },
   {
     id: "actions",
     cell: ({ row }) => {

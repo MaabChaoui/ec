@@ -1,82 +1,58 @@
-// app/lib/features/documents/documentsSlice.ts
+/* ----------------------------------------------------------------
+   Documents Redux slice
+   ---------------------------------------------------------------- */
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { Document } from "../../lib/definitions";
 
-export type Document = {
-  id: string;
-  name: string;
-  type: "folder" | "file";
-  parentFolder?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  size?: number;
-  fileType?: string;
-  items?: number; // Only for folders
-};
+/* ---------- type ---------- */
 
-export type DocumentsState = {
+/* ---------- state ---------- */
+interface DocumentsState {
   documents: Document[];
   loading: boolean;
   error: string | null;
-  currentFolder: string | null;
-};
+}
 
 const initialState: DocumentsState = {
   documents: [],
   loading: false,
   error: null,
-  currentFolder: null,
 };
-export const fetchDocuments = createAsyncThunk(
-  "documents/fetchDocuments",
-  async (folderId: string | null = null) => {
-    // Simulated API call with folder structure
-    const mockDocuments: Document[] = [
-      {
-        id: "1",
-        name: "Project Documents",
-        type: "folder",
-        parentFolder: null,
-        createdAt: "2024-03-01",
-        updatedAt: "2024-03-05",
-        items: 3,
-      },
-      {
-        id: "2",
-        name: "Financial Reports",
-        type: "folder",
-        parentFolder: null,
-        createdAt: "2024-02-15",
-        updatedAt: "2024-03-10",
-        items: 2,
-      },
-      {
-        id: "3",
-        name: "Project Plan.pdf",
-        type: "file",
-        parentFolder: "1",
-        createdAt: "2024-03-02",
-        updatedAt: "2024-03-05",
-        size: 2456789,
-        fileType: "pdf",
-      },
-      // Add more mock documents...
-    ];
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+/* ----------------------------------------------------------------
+      THUNK: fetchDocuments
+      ----------------------------------------------------------------
+      ‣ Calls your Next-proxy route `/api/documents`
+      ‣ That proxy will read the session cookie, add the JWT header, and
+        forward the request to SpringBoot `/api/document`
+      ‣ For now no params; extend later with search / pagination
+   ------------------------------------------------------------------ */
+export const fetchDocuments = createAsyncThunk<
+  Document[], // return type
+  void, // arg type
+  { rejectValue: string } // reject type
+>("documents/fetchDocuments", async (_, thunkAPI) => {
+  const res = await fetch("/api/documents", {
+    credentials: "include",
+  });
 
-    // Filter documents based on current folder
-    return mockDocuments.filter((doc) => doc.parentFolder === folderId);
-  },
-);
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    return thunkAPI.rejectWithValue(data.message ?? `Error ${res.status}`);
+  }
 
+  const data = (await res.json()) as Document[];
+  console.log("Next /api/document returned: ", data);
+  return data;
+});
+
+/* ----------------------------------------------------------------
+      SLICE
+   ------------------------------------------------------------------ */
 const documentsSlice = createSlice({
   name: "documents",
   initialState,
-  reducers: {
-    navigateToFolder: (state, action) => {
-      state.currentFolder = action.payload;
-    },
-  },
+  reducers: {}, // add filters/pagination later
   extraReducers: (builder) => {
     builder
       .addCase(fetchDocuments.pending, (state) => {
@@ -89,10 +65,10 @@ const documentsSlice = createSlice({
       })
       .addCase(fetchDocuments.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to fetch documents";
+        state.error =
+          action.payload ?? action.error.message ?? "Failed to fetch documents";
       });
   },
 });
 
-export const { navigateToFolder } = documentsSlice.actions;
 export default documentsSlice.reducer;

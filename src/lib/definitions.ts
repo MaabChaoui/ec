@@ -20,15 +20,16 @@ export type User = {
 };
 
 export type Document = {
-  id: string;
-  name: string;
-  type: "folder" | "file";
-  folder?: string;
-  created_at: string;
-  updated_at: string;
-  size?: string;
-  extension?: string;
-  url?: string;
+  id: number;
+  title: string;
+  department: string;
+  category: string;
+  creationDate: string; // ISO date string, e.g., "2025-05-10T19:29:05.836204"
+  createdBy: string;
+  status: string;
+  downloadUrl: string;
+  size?: string; //TODO
+  fileType?: string; // TODO
 };
 
 export type Department = {
@@ -37,3 +38,9 @@ export type Department = {
   createdAt: string | null;
   userCount: number | null;
 };
+
+export interface Category {
+  id: number;
+  name: string;
+  createdAt: string | null;
+}

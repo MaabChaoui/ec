@@ -5,16 +5,19 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import counterReducer from "./features/counterSlice";
 import authReducer from "./features/auth/authSlice";
 import usersReducer from "./features/usersSlice";
-import documentReducer from "./features/documentsSlice";
+// import documentReducer from "./features/documentsSlice_Old";
 import departmentReducer from "./features/departmentsSlice";
-
+import documentsReducer from "./features/documentsSlice";
+import categoriesReducer from "./features/categoriesSlice";
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     auth: authReducer,
     users: usersReducer,
-    documents: documentReducer,
+    // documents: documentReducer,
     departments: departmentReducer,
+    documents: documentsReducer,
+    categories: categoriesReducer,
   },
 });
 
