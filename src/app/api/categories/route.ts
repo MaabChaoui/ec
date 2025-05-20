@@ -19,7 +19,7 @@ export async function GET(_req: NextRequest) {
   });
 
   const data = await res.json().catch(() => ({}));
-  console.log(`${BACKEND}/api/categories data: `, data);
+  // console.log(`${BACKEND}/api/categories data: `, data);
 
   return NextResponse.json(data, { status: res.status });
 }

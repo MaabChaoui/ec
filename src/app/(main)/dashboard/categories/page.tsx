@@ -3,19 +3,19 @@
 
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { fetchDepartments } from "../../../store/features/departmentsSlice";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import DashboardHeader from "../../../components/dashboard/dashboardDepartmentsHeader";
+import DashboardHeader from "../../../../components/dashboard/dashboardCategoriesHeader";
+import { fetchCategories } from "../../../../store/features/categoriesSlice";
 
 export default function DepartmentsPage() {
   const dispatch = useAppDispatch();
-  const { departments, loading, error } = useAppSelector(
-    (state) => state.departments,
+  const { categories, loading, error } = useAppSelector(
+    (state) => state.categories,
   );
 
   useEffect(() => {
-    dispatch(fetchDepartments());
+    dispatch(fetchCategories());
   }, [dispatch]);
 
   return (
@@ -26,7 +26,7 @@ export default function DepartmentsPage() {
           Failed to load departments: {error}
         </div>
       )}
-      <DataTable columns={columns} data={departments} isLoading={loading} />
+      <DataTable columns={columns} data={categories} isLoading={loading} />
     </div>
   );
 }

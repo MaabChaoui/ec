@@ -3,6 +3,7 @@
 import React from "react";
 // "use server";
 // import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 // import React, { useEffect } from "react";
 // import { useDispatch, useSelector } from "react-redux";
@@ -17,6 +18,6 @@ export default function DemoPage() {
   // useEffect(() => {
   //   dispatch(fetchUsers({ page: 1, perPage: 5, searchTerm: "" }));
   // }, [dispatch]);
-
+  redirect("/dashboard/users");
   return <div className="container mx-auto py-10">hello</div>;
 }

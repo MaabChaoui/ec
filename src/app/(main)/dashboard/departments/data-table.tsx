@@ -24,13 +24,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -38,25 +36,12 @@ import {
 } from "@/components/ui/pagination";
 
 import { Input } from "@/components/ui/input";
-
 import { Button } from "@/components/ui/button";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 import { Separator } from "@/components/ui/separator";
-
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { fetchDepartments } from "../../../store/features/departmentsSlice";
-import { Category, Department } from "../../../lib/definitions";
-import { fetchCategories } from "../../../store/features/categoriesSlice";
-import { formatDate } from "../../../lib/utils";
+import { fetchDepartments } from "../../../../store/features/departmentsSlice";
+import { Department } from "../../../../lib/definitions";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -76,7 +61,7 @@ export function DataTable<TData, TValue>({
 
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
-    dispatch(fetchCategories());
+    dispatch(fetchDepartments());
   };
 
   const table = useReactTable({
@@ -85,7 +70,7 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const [selected, setSelected] = useState<Category | null>(null);
+  const [selected, setSelected] = useState<Department | null>(null);
 
   return (
     <div className="rounded-md border min-h-[400px] flex flex-col">
@@ -124,7 +109,7 @@ export function DataTable<TData, TValue>({
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 // Assume the row's original data is of type User.
-                const dep = row.original as Category;
+                const dep = row.original as Department;
 
                 return (
                   <TableRow
@@ -205,18 +190,19 @@ export function DataTable<TData, TValue>({
       {/* <Dialog key={row.id} open={diagOpen} onOpenChange={setDiagOpen}> */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         {selected && (
-          <DialogContent className="bg-transparent backdrop-blur-lg">
+          <DialogContent className="dark:bg-transparent  backdrop-blur-lg">
             <DialogHeader className="flex justify-center">
               <DialogTitle className="flex justify-center">
-                Edit Category
+                Edit Department
               </DialogTitle>
             </DialogHeader>
             <form
               className="space-y-4"
               onSubmit={async (e) => {
                 e.preventDefault();
-                // TODO
-
+                // const formData = new FormData(e.currentTarget);
+                // formData.set("role", role);
+                // formData.set("status", status);
                 try {
                   // await updateUserAction([dep], formData);
                   setSelected(null);
@@ -242,10 +228,9 @@ export function DataTable<TData, TValue>({
                 <label className="block text-sm font-medium">Created At</label>
                 <Input
                   type="text"
-                  // placeholder={new Date(
-                  //   selected.createdAt ?? ""
-                  // ).toLocaleString()}
-                  placeholder={formatDate(selected.createdAt ?? "")}
+                  placeholder={new Date(
+                    selected.createdAt ?? "",
+                  ).toLocaleString()}
                   disabled
                   className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
                 />

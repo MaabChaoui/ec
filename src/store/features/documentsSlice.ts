@@ -1,58 +1,74 @@
-/* ----------------------------------------------------------------
-   Documents Redux slice
-   ---------------------------------------------------------------- */
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+// store/features/documentsSlice.ts
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Document } from "../../lib/definitions";
 
-/* ---------- type ---------- */
-
-/* ---------- state ---------- */
 interface DocumentsState {
   documents: Document[];
   loading: boolean;
   error: string | null;
+  currentPage: number;
+  totalPages: number;
+  perPage: number;
+  searchTerm: string;
 }
 
 const initialState: DocumentsState = {
   documents: [],
   loading: false,
   error: null,
+  currentPage: 1,
+  totalPages: 1,
+  perPage: 10,
+  searchTerm: "",
 };
 
-/* ----------------------------------------------------------------
-      THUNK: fetchDocuments
-      ----------------------------------------------------------------
-      ‣ Calls your Next-proxy route `/api/documents`
-      ‣ That proxy will read the session cookie, add the JWT header, and
-        forward the request to SpringBoot `/api/document`
-      ‣ For now no params; extend later with search / pagination
-   ------------------------------------------------------------------ */
 export const fetchDocuments = createAsyncThunk<
-  Document[], // return type
-  void, // arg type
-  { rejectValue: string } // reject type
->("documents/fetchDocuments", async (_, thunkAPI) => {
-  const res = await fetch("/api/documents", {
-    credentials: "include",
-  });
+  {
+    documents: Document[];
+    totalPages: number;
+    currentPage: number;
+    perPage: number;
+  },
+  { page: number; perPage: number; searchTerm: string },
+  { rejectValue: string }
+>(
+  "documents/fetchDocuments",
+  async ({ page, perPage, searchTerm }, thunkAPI) => {
+    const params = new URLSearchParams({
+      page: String(page),
+      perPage: String(perPage),
+      search: searchTerm,
+    });
+    console.log(`/api/documents?${params.toString()}`);
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    return thunkAPI.rejectWithValue(data.message ?? `Error ${res.status}`);
-  }
+    const res = await fetch(`/api/documents?${params.toString()}`, {
+      credentials: "include",
+    });
+    if (!res.ok) {
+      const { message } = await res.json().catch(() => ({}));
+      return thunkAPI.rejectWithValue(message ?? `Error ${res.status}`);
+    }
+    const data = await res.json();
+    console.log("Got the data: ", data);
+    return {
+      documents: data.content as Document[],
+      totalPages: data.totalPages as number,
+      currentPage: (data.number as number) + 1,
+      perPage: data.size as number,
+    };
+  },
+);
 
-  const data = (await res.json()) as Document[];
-  console.log("Next /api/document returned: ", data);
-  return data;
-});
-
-/* ----------------------------------------------------------------
-      SLICE
-   ------------------------------------------------------------------ */
 const documentsSlice = createSlice({
   name: "documents",
   initialState,
-  reducers: {}, // add filters/pagination later
+  reducers: {
+    setSearchTerm(state, action: PayloadAction<string>) {
+      console.log("setSearchTerm: (document) ", action.payload);
+      state.searchTerm = action.payload;
+      state.currentPage = 1;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchDocuments.pending, (state) => {
@@ -61,7 +77,10 @@ const documentsSlice = createSlice({
       })
       .addCase(fetchDocuments.fulfilled, (state, action) => {
         state.loading = false;
-        state.documents = action.payload;
+        state.documents = action.payload.documents;
+        state.totalPages = action.payload.totalPages;
+        state.currentPage = action.payload.currentPage;
+        state.perPage = action.payload.perPage;
       })
       .addCase(fetchDocuments.rejected, (state, action) => {
         state.loading = false;
@@ -71,4 +90,5 @@ const documentsSlice = createSlice({
   },
 });
 
+export const { setSearchTerm } = documentsSlice.actions;
 export default documentsSlice.reducer;

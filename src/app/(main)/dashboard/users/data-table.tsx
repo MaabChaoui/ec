@@ -59,10 +59,10 @@ import { Separator } from "@/components/ui/separator";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { fetchUsers } from "../../../store/features/usersSlice";
-import { updateUserAction } from "../../../actions/users/action";
+import { fetchUsers } from "../../../../store/features/usersSlice";
+import { updateUserAction } from "../../../../actions/users/action";
 
-import { User } from "../../../lib/definitions";
+import { User } from "../../../../lib/definitions";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -231,7 +231,7 @@ export function DataTable<TData, TValue>({
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         {selected && (
-          <DialogContent className="bg-transparent backdrop-blur-lg">
+          <DialogContent className="dark:bg-transparent backdrop-blur-lg">
             <DialogHeader className="flex justify-center">
               <DialogTitle className="flex justify-center">
                 Edit User {selected?.name}
@@ -387,7 +387,7 @@ export function DataTable<TData, TValue>({
                 >
                   Cancel
                 </Button>
-                <Button
+                {/* <Button
                   onClick={(e) => {
                     e.preventDefault();
                     console.log("selected: ", selected);
@@ -397,7 +397,7 @@ export function DataTable<TData, TValue>({
                   }}
                 >
                   log
-                </Button>
+                </Button> */}
                 <Button type="submit" className="px-4 py-2">
                   Save
                 </Button>

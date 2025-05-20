@@ -25,8 +25,9 @@ export async function createUserAction(
   const res = await fetch(`${BACKEND}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password, departmentIds }),
+    body: JSON.stringify({ name, email, password, departmentIds: [] }),
   });
+
   console.log("RES:", res);
 
   if (!res.ok) {

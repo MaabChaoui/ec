@@ -32,7 +32,7 @@ export default function UsersList() {
             </Button>
           </DialogTrigger>
 
-          <DialogContent className="bg-transparent backdrop-blur-lg">
+          <DialogContent className="dark:bg-transparent  backdrop-blur-lg">
             <DialogHeader className="flex justify-center">
               <DialogTitle>Create New Category</DialogTitle>
             </DialogHeader>
@@ -85,7 +85,7 @@ export default function UsersList() {
               <FolderPlus /> Upload from File
             </Button>
           </DialogTrigger>{" "}
-          <DialogContent className="bg-transparent backdrop-blur-lg">
+          <DialogContent className="dark:bg-transparent  backdrop-blur-lg">
             <DialogHeader className="flex align-center justify-center">
               <DialogTitle className="flex align-center justify-center">
                 Coming Soon

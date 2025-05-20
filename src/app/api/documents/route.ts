@@ -25,18 +25,22 @@ export async function GET(req: NextRequest) {
       { status: 401 },
     );
   }
-  console.log(token);
+  // console.log(token);
+
   /* ---------- 2. forward to Spring Boot ---------- */
-  const backendRes = await fetch(`${BACKEND}/api/documents`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  const url = new URL(`${BACKEND}/api/documents`);
+  req.nextUrl.searchParams.forEach((v, k) => url.searchParams.append(k, v));
+  console.log("url.toString(): ", url.toString());
+
+  const backendRes = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${token}` },
   });
+
   console.log(`${BACKEND}/api/documents `, backendRes);
   /* ---------- 3. pass response through ---------- */
   //   const data = await backendRes.json().catch(() => ({}));
 
-  const data = await backendRes.json();
+  const data = await backendRes.json().catch(() => ({}));
   console.log("data: ", data);
 
   return NextResponse.json(data, { status: backendRes.status });

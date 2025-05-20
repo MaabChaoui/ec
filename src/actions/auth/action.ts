@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // Server action: loginAction.ts
 "use server";
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers";
 import { createSession, deleteSession } from "../../lib/session";
 
 // login
-export async function loginAction(prevState: any, formData: FormData) {
+export async function loginAction(prevState: unknown, formData: FormData) {
   console.log("making loginAction");
   try {
     // Convert form data values to strings
@@ -50,7 +51,7 @@ export async function loginAction(prevState: any, formData: FormData) {
   }
 }
 // logout
-export async function logoutAction(prevState: any) {
+export async function logoutAction(prevState: unknown) {
   try {
     // console.log("making logoutAction");
     await deleteSession();

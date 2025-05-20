@@ -1,11 +1,8 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-import { User } from "../../../lib/definitions";
-import { formatDate } from "../../../lib/utils";
+import { User } from "../../../../lib/definitions";
+import { formatDate } from "../../../../lib/utils";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -14,7 +11,7 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "name",
-    header: "Department Name",
+    header: "Category",
   },
   {
     accessorKey: "createdAt",
@@ -25,8 +22,7 @@ export const columns: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: "users_count",
-    header: "User Counts",
+    accessorKey: "docs_count",
+    header: "Documents Count",
   },
-  //TODO: add counts per department
 ];

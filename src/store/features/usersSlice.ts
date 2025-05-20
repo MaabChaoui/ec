@@ -1,8 +1,6 @@
 // app/lib/features/users/usersSlice.ts
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { User } from "../../lib/definitions";
-import { Search } from "lucide-react";
-// import { cookies } from "next/headers";
 
 interface UsersState {
   users: User[];
@@ -60,12 +58,6 @@ export const fetchUsers = createAsyncThunk(
       totalPages: data.totalPages,
       currentPage: data.number + 1 || page,
       perPage: data.size || perPage,
-    };
-    return {
-      users: data,
-      totalPages: 1,
-      currentPage: 1,
-      perPage: 20,
     };
   },
 );

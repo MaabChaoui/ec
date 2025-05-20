@@ -24,13 +24,17 @@ export default function UsersList() {
   const [open, setOpen] = useState(false);
   const dispatch = useAppDispatch();
 
-  const { categories, cat_loading, cat_error } = useAppSelector(
-    (state) => state.categories,
-  );
+  const {
+    categories,
+    loading: cat_loading,
+    error: cat_error,
+  } = useAppSelector((state) => state.categories);
 
-  const { departments, dep_loading, dep_error } = useAppSelector(
-    (state) => state.departments,
-  );
+  const {
+    departments,
+    loading: dep_loading,
+    error: dep_error,
+  } = useAppSelector((state) => state.departments);
   useEffect(() => {
     dispatch(fetchCategories());
     dispatch(fetchDepartments());
@@ -47,7 +51,7 @@ export default function UsersList() {
             </Button>
           </DialogTrigger>
 
-          <DialogContent className="bg-transparent backdrop-blur-lg">
+          <DialogContent className="dark:bg-transparent  backdrop-blur-lg">
             <DialogHeader className="flex justify-center">
               <DialogTitle>Create New Document</DialogTitle>
             </DialogHeader>
@@ -64,7 +68,9 @@ export default function UsersList() {
 
                   setDocuments(updated); // optimistic
                   setOpen(false);
-                  dispatch(fetchDocuments()); // sync slice
+                  dispatch(
+                    fetchDocuments({ page: 1, perPage: 10, searchTerm: "" }),
+                  ); // sync slice
                 } catch (err) {
                   console.error(err);
                   // TODO: toast
@@ -146,7 +152,7 @@ export default function UsersList() {
               <FolderPlus /> Upload from File
             </Button>
           </DialogTrigger>{" "}
-          <DialogContent className="bg-transparent backdrop-blur-lg">
+          <DialogContent className="dark:bg-transparent  backdrop-blur-lg">
             <DialogHeader className="flex align-center justify-center">
               <DialogTitle className="flex align-center justify-center">
                 Coming Soon
