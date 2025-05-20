@@ -1,101 +1,123 @@
+// app/actions/users/action.ts
 "use server";
 
 import { cookies } from "next/headers";
 import { decrypt } from "../../lib/session";
 import { User } from "../../lib/definitions";
 
+const BACKEND = process.env.BACKEND_URL ?? "http://localhost:8081";
+
+/* ------------------------------------------------------------------ */
+/*  CREATE  */
+/* ------------------------------------------------------------------ */
 export async function createUserAction(
-  prevState: any[],
+  prevState: User[],
   formData: FormData,
-): Promise<any[]> {
-  // pull values out of the form
+): Promise<User[]> {
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const deptsRaw = formData.get("departments") as string | null;
 
-  const departmentIds = [1]; // TODO
+  const departmentIds: number[] = deptsRaw ? JSON.parse(deptsRaw) : [];
+  console.log("createUserAction: ", { departmentIds });
 
-  // POST to your SpringBoot users endpoint
-  console.log(
-    "json body: ",
-    JSON.stringify({ name, email, password, departmentIds }),
-  );
-
-  const backendUrl = process.env.BACKEND_URL;
-  console.log("backendUrl:", backendUrl);
-  if (!backendUrl) {
-    throw new Error("BACKEND_URL is not defined in environment variables.");
-  }
-
-  //   const res = await fetch(`${process.env.BACKEND_URL}/auth/signup`, {
-  const res = await fetch(`${backendUrl}/auth/signup`, {
+  const res = await fetch(`${BACKEND}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, departmentIds, name }),
+    body: JSON.stringify({ name, email, password, departmentIds: [] }),
   });
 
-  console.log("res", res);
+  console.log("RES:", res);
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error("Failed to create user: " + err);
+    throw new Error("Failed to create user: " + (await res.text()));
   }
 
-  const newUser = await res.json();
-  // merge into your existing list
+  const newUser: User = await res.json();
   return [...prevState, newUser];
 }
 
-const BACKEND = process.env.BACKEND_URL ?? "http://localhost:8081";
-
+/* ------------------------------------------------------------------ */
+/*  UPDATE  +  ASSIGN DEPARTMENTS  */
+/* ------------------------------------------------------------------ */
 export async function updateUserAction(
-  prevUsers: User[],
+  prevUsers: User[] | null,
   formData: FormData,
-): Promise<User[]> {
-  // 1) Pull data out of FormData
-  const id = formData.get("id")?.toString();
-  const name = formData.get("name")?.toString();
-  const email = formData.get("email")?.toString();
-  const status = formData.get("status")?.toString();
-  const role = formData.get("role")?.toString();
-  const password = formData.get("password")?.toString();
-
-  if (!id) throw new Error("Missing user ID");
-
-  // 2) Grab your JWT from the cookie
+): Promise<User[] | null> {
+  console.log("UPDATING USER ", formData.get("name"));
+  /* ------------ 0. common auth ------------- */
   const raw = (await cookies()).get("session")?.value;
   if (!raw) throw new Error("Not authenticated");
-  const session = await decrypt(raw);
-  const token = session?.token;
+  const token = (await decrypt(raw))?.token;
   if (!token) throw new Error("No token in session");
 
-  // 3) Build the JSON body—only send fields that exist
-  const body: any = {};
+  /* ------------ 1. parse form  ------------- */
+  const id = formData.get("id")?.toString();
+  if (!id) throw new Error("Missing user ID");
+
+  const name = formData.get("name") as string | null;
+  const email = formData.get("email") as string | null;
+  const status = formData.get("status") as string | null;
+  const role = formData.get("role") as string | null;
+  const password = formData.get("password") as string | null;
+  const deptsRaw = formData.get("departments") as string | null;
+
+  const departmentIds: number[] =
+    deptsRaw && deptsRaw.length ? JSON.parse(deptsRaw) : [];
+
+  /* ------------ 2. update user core fields ------------- */
+  const body: Record<string, unknown> = {};
   if (name) body.name = name;
   if (email) body.email = email;
   if (status) body.status = status;
   if (role) body.role = role;
   if (password) body.password = password;
 
-  console.log("PUT body:", body);
-  // 4) Call your backend
-  console.log("Making PUT request to backend...");
-  const res = await fetch(`${BACKEND}/api/users/${encodeURIComponent(id)}`, {
+  let updatedUser: User;
+  console.log("BODY:", body);
+
+  if (Object.keys(body).length) {
+    const res = await fetch(`${BACKEND}/api/users/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      throw new Error(
+        `Failed to update user: ${res.status} ${await res.text()}`,
+      );
+    }
+    updatedUser = await res.json();
+  } else {
+    // nothing changed
+    updatedUser = prevUsers.find((u) => u.id === Number(id)) as User;
+  }
+
+  /* ------------ 3. assign (replace) departments ------------- */
+  console.log("ID: ", id);
+  const res = await fetch(`${BACKEND}/api/users/${id}/assign-departments`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(departmentIds),
   });
-
+  console.log("RES:", res);
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Failed to update user: ${res.status} ${text}`);
+    throw new Error(
+      `Failed to assign departments: ${res.status} ${await res.text()}`,
+    );
   }
-  console.log("YES BABYY");
-  const updatedUser: User = await res.json();
-
-  // 5) Replace the user in your list
-  return prevUsers.map((u) => (u.id === updatedUser.id ? updatedUser : u));
+  updatedUser = await res.json(); // bao  ckend returns UserResponse
+  console.log("UPDATED USER:", updatedUser);
+  /* ------------ 4. merge into list ------------- */
+  return (
+    prevUsers?.map((u) => (u.id === updatedUser.id ? updatedUser : u)) ?? null
+  );
 }

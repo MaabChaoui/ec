@@ -49,22 +49,7 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <Providers>
-            <AuthProvider>
-              <SidebarProvider>
-                <AppSidebarContainer />
-                <main className="w-full">
-                  <div className="flex items-center gap-2 px-4">
-                    <SidebarTrigger />
-                    <Separator orientation="vertical" className="mr-2 h-4" />
-                    <ModeToggle />
-                    <Separator orientation="vertical" className="mr-2 h-4" />
-                    <LocaleSwitcher />
-                    <Separator orientation="vertical" className="mr-2 h-4" />
-                  </div>
-                  {children}
-                </main>
-              </SidebarProvider>
-            </AuthProvider>
+            <AuthProvider>{children}</AuthProvider>
           </Providers>
         </NextIntlClientProvider>
       </body>

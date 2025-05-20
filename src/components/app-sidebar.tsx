@@ -28,11 +28,6 @@ import {
 } from "@/components/ui/sidebar";
 
 const data = {
-  user: {
-    name: "Maab Chaoui",
-    email: "maab.chaoui@ensia.edu.dz",
-    avatar: "/globe.svg",
-  },
   teams: [
     {
       name: "Ensia",
@@ -52,6 +47,10 @@ const data = {
       icon: SquareTerminal,
       isActive: true,
       items: [
+        {
+          title: "Admin Analytics",
+          url: "/dashboard/admin",
+        },
         {
           title: "Users",
           url: "/dashboard/users",
@@ -77,8 +76,8 @@ const data = {
           url: "/dashboard/documents",
         },
         {
-          title: "idk",
-          url: "#",
+          title: "Categories",
+          url: "/dashboard/categories",
         },
       ],
     },
@@ -128,9 +127,9 @@ const data = {
 export function AppSidebar({
   session,
   ...props
-}: { session: { role?: string } | null } & React.ComponentProps<
-  typeof Sidebar
->) {
+}: {
+  session: { name?: string; email?: string; role?: string } | null;
+} & React.ComponentProps<typeof Sidebar>) {
   const isAdmin = session?.role.toLowerCase() === "admin";
 
   // slice off “Admin Dashboard” if not admin
@@ -140,6 +139,12 @@ export function AppSidebar({
       return true;
     });
   }, [isAdmin]);
+
+  const user = {
+    name: session?.name ?? "User",
+    email: session?.email ?? "email",
+    avatar: "/globe.svg",
+  };
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -151,7 +156,7 @@ export function AppSidebar({
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

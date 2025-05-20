@@ -1,5 +1,5 @@
 "use client";
-
+import React from "react";
 import { startTransition, useActionState } from "react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -31,7 +31,9 @@ export default function LogoutMenuItem() {
       //   Redirect to login
       router.push("/login");
     } else {
-      console.log("wtf")
+      console.log("wtf");
+      dispatch(logout());
+      // router.push("/login");
     }
   }, [state, router, dispatch]);
 

@@ -3,10 +3,10 @@
 
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { fetchDepartments } from "../../../store/features/departmentsSlice";
+import { fetchDepartments } from "../../../../store/features/departmentsSlice";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import DashboardHeader from "../../../components/dashboard/dashboardDepartmentsHeader";
+import DashboardHeader from "../../../../components/dashboard/dashboardDepartmentsHeader";
 
 export default function DepartmentsPage() {
   const dispatch = useAppDispatch();

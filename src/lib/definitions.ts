@@ -7,7 +7,7 @@ export interface SessionPayload {
 }
 
 export type User = {
-  id: string;
+  id: string | number;
   created_at: Date | string | null;
   updated_at: Date | string | null;
   name: string;
@@ -15,22 +15,32 @@ export type User = {
   status: string;
   role: string; // Typically 'user' | 'admin'
   photo: string;
+
+  departmentIds: Array<number>;
 };
 
 export type Document = {
-  id: string;
-  name: string;
-  type: "folder" | "file";
-  folder?: string;
-  created_at: string;
-  updated_at: string;
-  size?: string;
-  extension?: string;
-  url?: string;
+  id: number;
+  title: string;
+  department: string;
+  category: string;
+  creationDate: string; // ISO date string, e.g., "2025-05-10T19:29:05.836204"
+  createdBy: string;
+  status: string;
+  downloadUrl: string;
+  size?: string; //TODO
+  fileType?: string; // TODO
 };
 
 export type Department = {
   id: string;
   name: string;
-  createdAt: string | any;
+  createdAt: string | null;
+  userCount: number | null;
 };
+
+export interface Category {
+  id: number;
+  name: string;
+  createdAt: string | null;
+}

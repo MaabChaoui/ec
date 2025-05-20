@@ -1,71 +1,61 @@
-// app/lib/features/documents/documentsSlice.ts
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+// store/features/documentsSlice.ts
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Document } from "../../lib/definitions";
 
-export type Document = {
-  id: string;
-  name: string;
-  type: "folder" | "file";
-  parentFolder?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  size?: number;
-  fileType?: string;
-  items?: number; // Only for folders
-};
-
-export type DocumentsState = {
+interface DocumentsState {
   documents: Document[];
   loading: boolean;
   error: string | null;
-  currentFolder: string | null;
-};
+  currentPage: number;
+  totalPages: number;
+  perPage: number;
+  searchTerm: string;
+}
 
 const initialState: DocumentsState = {
   documents: [],
   loading: false,
   error: null,
-  currentFolder: null,
+  currentPage: 1,
+  totalPages: 1,
+  perPage: 10,
+  searchTerm: "",
 };
-export const fetchDocuments = createAsyncThunk(
+
+export const fetchDocuments = createAsyncThunk<
+  {
+    documents: Document[];
+    totalPages: number;
+    currentPage: number;
+    perPage: number;
+  },
+  { page: number; perPage: number; searchTerm: string },
+  { rejectValue: string }
+>(
   "documents/fetchDocuments",
-  async (folderId: string | null = null) => {
-    // Simulated API call with folder structure
-    const mockDocuments: Document[] = [
-      {
-        id: "1",
-        name: "Project Documents",
-        type: "folder",
-        parentFolder: null,
-        createdAt: "2024-03-01",
-        updatedAt: "2024-03-05",
-        items: 3,
-      },
-      {
-        id: "2",
-        name: "Financial Reports",
-        type: "folder",
-        parentFolder: null,
-        createdAt: "2024-02-15",
-        updatedAt: "2024-03-10",
-        items: 2,
-      },
-      {
-        id: "3",
-        name: "Project Plan.pdf",
-        type: "file",
-        parentFolder: "1",
-        createdAt: "2024-03-02",
-        updatedAt: "2024-03-05",
-        size: 2456789,
-        fileType: "pdf",
-      },
-      // Add more mock documents...
-    ];
+  async ({ page, perPage, searchTerm }, thunkAPI) => {
+    const params = new URLSearchParams({
+      page: String(page),
+      perPage: String(perPage),
+      search: searchTerm,
+    });
+    console.log(`/api/documents?${params.toString()}`);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Filter documents based on current folder
-    return mockDocuments.filter((doc) => doc.parentFolder === folderId);
+    const res = await fetch(`/api/documents?${params.toString()}`, {
+      credentials: "include",
+    });
+    if (!res.ok) {
+      const { message } = await res.json().catch(() => ({}));
+      return thunkAPI.rejectWithValue(message ?? `Error ${res.status}`);
+    }
+    const data = await res.json();
+    console.log("Got the data: ", data);
+    return {
+      documents: data.content as Document[],
+      totalPages: data.totalPages as number,
+      currentPage: (data.number as number) + 1,
+      perPage: data.size as number,
+    };
   },
 );
 
@@ -73,8 +63,10 @@ const documentsSlice = createSlice({
   name: "documents",
   initialState,
   reducers: {
-    navigateToFolder: (state, action) => {
-      state.currentFolder = action.payload;
+    setSearchTerm(state, action: PayloadAction<string>) {
+      console.log("setSearchTerm: (document) ", action.payload);
+      state.searchTerm = action.payload;
+      state.currentPage = 1;
     },
   },
   extraReducers: (builder) => {
@@ -85,14 +77,18 @@ const documentsSlice = createSlice({
       })
       .addCase(fetchDocuments.fulfilled, (state, action) => {
         state.loading = false;
-        state.documents = action.payload;
+        state.documents = action.payload.documents;
+        state.totalPages = action.payload.totalPages;
+        state.currentPage = action.payload.currentPage;
+        state.perPage = action.payload.perPage;
       })
       .addCase(fetchDocuments.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to fetch documents";
+        state.error =
+          action.payload ?? action.error.message ?? "Failed to fetch documents";
       });
   },
 });
 
-export const { navigateToFolder } = documentsSlice.actions;
+export const { setSearchTerm } = documentsSlice.actions;
 export default documentsSlice.reducer;

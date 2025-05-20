@@ -15,7 +15,7 @@ const Providers: React.FC<ProvidersProps> = ({ children }) => {
         attribute="class"
         defaultTheme="system"
         enableSystem
-        disableTransitionOnChange
+        // disableTransitionOnChange
       >
         {children}
       </ThemeProvider>

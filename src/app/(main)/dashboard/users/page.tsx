@@ -5,16 +5,16 @@ import React, { useEffect, useRef, useState } from "react";
 // import { useDispatch, useSelector } from "react-redux";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 // import { AppDispatch, RootState } from "../../lib/store";
-import { fetchUsers } from "../../../store/features/usersSlice";
-import { setSearchTerm } from "../../../store/features/usersSlice";
+import { fetchUsers } from "../../../../store/features/usersSlice";
+import { setSearchTerm } from "../../../../store/features/usersSlice";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import DashboardHeader from "../../../components/dashboard/dashboardHeader";
+import DashboardHeader from "../../../../components/dashboard/dashboardHeader";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import SearchIcon from "../../../components/ui/searchIcon";
 import { Input } from "@/components/ui/input";
 import { Filter } from "lucide-react";
 import { Search } from "lucide-react";
+import { fetchDepartments } from "../../../../store/features/departmentsSlice";
 
 export default function DemoPage() {
   const dispatch = useAppDispatch();
@@ -37,6 +37,10 @@ export default function DemoPage() {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
   }, [localSearch, dispatch]);
+
+  useEffect(() => {
+    dispatch(fetchDepartments());
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchUsers({ page: 1, perPage: perPage, searchTerm: searchTerm }));

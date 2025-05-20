@@ -6,7 +6,14 @@ import { cookies } from "next/headers";
 // NextJs official documentation
 
 // 1. Specify protected and public routes
-const protectedRoutes = ["/dashboard", "/dashboard/admin", "/dashboard/users"];
+const protectedRoutes = [
+  "/dashboard",
+  "/dashboard/admin",
+  "/dashboard/users",
+  "/dashboard/documents",
+  "/dashboard/categories",
+  "/dashboard/departments",
+];
 const publicRoutes = ["/login", "/signup", "/"];
 
 export default async function middleware(req: NextRequest) {
@@ -22,19 +29,21 @@ export default async function middleware(req: NextRequest) {
 
   // 4. Redirect to /login if the user is not authenticated
   if (isProtectedRoute && !session?.id) {
-    return NextResponse.redirect(new URL("/login", req.nextUrl));
+    return NextResponse.redirect(new URL("/login/", req.nextUrl));
   }
   console.log(path);
-  console.log(path.includes("admin"));
+  // console.log(path.includes("admin"));
 
   if (
-    isProtectedRoute &&
-    session?.role.toLowerCase() !== "admin" &&
-    path.includes("admin")
+    (isProtectedRoute &&
+      session?.role.toLowerCase() !== "admin" &&
+      path.includes("admin")) ||
+    path.includes("users") ||
+    path.includes("departments")
   ) {
-    console.log("middlewaring...");
+    // console.log("middlewaring...");
 
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/dashboard/documents", req.url));
   }
 
   if (
@@ -42,9 +51,9 @@ export default async function middleware(req: NextRequest) {
     session?.role.toLowerCase() !== "admin" &&
     path.includes("users")
   ) {
-    console.log("middlewaring...");
+    // console.log("middlewaring...");
 
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/dashboard/documents", req.url));
   }
 
   // 5. Redirect to /dashboard if the user is authenticated
