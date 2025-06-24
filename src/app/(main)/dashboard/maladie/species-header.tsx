@@ -34,7 +34,7 @@ export function SpeciesHeader({
   return (
     <div className="mb-8">
       {/* Page Title */}
-      <h1 className="text-3xl font-semibold text-gray-900 mb-8">Species</h1>
+      <h1 className="text-3xl font-semibold text-gray-900 mb-8">Maladie</h1>
       
       {/* Filter Controls Row - matches the gray background container in the image */}
       <div className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">

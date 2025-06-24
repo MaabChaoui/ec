@@ -37,8 +37,8 @@ import {
   PaginationContent,
   PaginationItem,
   PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
+  PaginationSuivant,
+  PaginationPrécédent,
 } from "@/components/ui/pagination";
 
 import { Input } from "@/components/ui/input";
@@ -200,7 +200,7 @@ export function DataTable<TData, TValue>({
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious
+                <PaginationPrécédent
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
@@ -220,7 +220,7 @@ export function DataTable<TData, TValue>({
                 <span className="mx-2">of {totalPages}</span>
               </PaginationItem>
               <PaginationItem>
-                <PaginationNext
+                <PaginationSuivant
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();

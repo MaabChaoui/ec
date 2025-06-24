@@ -31,7 +31,7 @@ export function SpeciesAddDialog({ onSpeciesCreated }: SpeciesAddDialogProps) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-center">
-            Add New Species
+            Ajouter une nouvelle maladie
           </DialogTitle>
         </DialogHeader>
 

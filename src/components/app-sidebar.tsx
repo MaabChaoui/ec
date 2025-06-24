@@ -16,6 +16,7 @@ import {
   Layers,
   User,
   Table,
+  Leaf,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
@@ -42,16 +43,6 @@ const data = {
       isActive: true,
     },
     {
-      title: "Products",
-      url: "/dashboard/products",
-      icon: Package,
-    },
-    {
-      title: "Favorites",
-      url: "/dashboard/favorites",
-      icon: Heart,
-    },
-    {
       title: "Chatbot",
       url: "/dashboard/chatbot",
       icon: MessageCircle,
@@ -62,8 +53,8 @@ const data = {
       icon: List,
     },
     {
-      title: "Product Stock",
-      url: "/dashboard/stock",
+      title: "Maladie",
+      url: "/dashboard/maladie",
       icon: Package2,
     },
   ],
@@ -116,11 +107,11 @@ function DashStackLogo() {
   return (
     <div className="flex items-center gap-2 px-4 py-2">
       <div className="h-8 w-8 rounded bg-blue-600 flex items-center justify-center">
-        <BarChart3 className="h-5 w-5 text-white" />
+        <Leaf className="h-5 w-5 text-white" />
       </div>
       <span className="text-lg font-semibold">
-        <span className="text-blue-600">Dash</span>
-        <span className="text-gray-900">Stack</span>
+        <span className="text-blue-600">Hamma</span>
+        <span className="text-gray-900">DB</span>
       </span>
     </div>
   );
@@ -165,7 +156,7 @@ export function AppSidebar({
       <SidebarHeader>
         <DashStackLogo />
       </SidebarHeader>
-      <SidebarContent className="space-y-2">
+      <SidebarContent className="bg-white space-y-2">
         <NavLinks items={data.navMain} />
         <SidebarGroup>
           <div className="px-2 py-1">
