@@ -7,6 +7,8 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { Separator } from "@/components/ui/separator";
 import LocaleSwitcher from "@/components/LocaleSwitcherSelect";
 import AppSidebarContainer from "../../components/AppSidebarContainer";
+import 'leaflet/dist/leaflet.css';
+
 
 export default async function RootLayout({
   children,
@@ -16,7 +18,7 @@ export default async function RootLayout({
   return (
     <SidebarProvider>
       <AppSidebarContainer />
-      <main className="w-full">
+      <main className="w-full bg-[#F5F6FA]">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 h-4" />

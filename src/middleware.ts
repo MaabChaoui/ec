@@ -6,14 +6,15 @@ import { cookies } from "next/headers";
 // NextJs official documentation
 
 // 1. Specify protected and public routes
-const protectedRoutes = [
-  "/dashboard",
-  "/dashboard/admin",
-  "/dashboard/users",
-  "/dashboard/documents",
-  "/dashboard/categories",
-  "/dashboard/departments",
-];
+// const protectedRoutes = [
+//   "/dashboard",
+//   "/dashboard/admin",
+//   "/dashboard/users",
+//   "/dashboard/documents",
+//   "/dashboard/categories",
+//   "/dashboard/departments",
+// ];
+const protectedRoutes = [];
 const publicRoutes = ["/login", "/signup", "/"];
 
 export default async function middleware(req: NextRequest) {
