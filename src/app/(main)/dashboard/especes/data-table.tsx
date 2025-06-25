@@ -1,13 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-// import { useAppSelector } from "@/store/store";       // instead of bare useSelector
-import { Checkbox } from "@/components/ui/checkbox"; // shadcn checkbox
-// import { assignDepartments, unassignDepartments } from "../../../store/features/usersSlice";
-import { assignDepartments } from "../../../store/features/usersSlice";
-
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 import {
   ColumnDef,
@@ -30,13 +24,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationSuivant,
@@ -44,70 +36,138 @@ import {
 } from "@/components/ui/pagination";
 
 import { Input } from "@/components/ui/input";
-
 import { Button } from "@/components/ui/button";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { fetchUsers } from "../../../../store/features/usersSlice";
-import { updateUserAction } from "../../../../actions/users/action";
-
-import { User } from "../../../../lib/definitions";
+// Species type matching your Genre table schema
+export type Species = {
+  id: number;
+  genre: string; // nom_scientifique in your design
+  ordre: string;
+  statut_conservation: string;
+  description: string;
+};
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading?: boolean;
+  searchTerm?: string;
+  onRefresh?: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   isLoading,
+  searchTerm = "",
+  onRefresh,
 }: DataTableProps<TData, TValue>) {
-  const dispatch = useDispatch();
-  const { currentPage, totalPages, searchTerm } = useSelector(
-    (state) => state.users,
-  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selected, setSelected] = useState<Species | null>(null);
+  
+  // Form states for editing
+  const [editGenre, setEditGenre] = useState("");
+  const [editOrdre, setEditOrdre] = useState("");
+  const [editStatutConservation, setEditStatutConservation] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > totalPages) return;
-    dispatch(
-      fetchUsers({ page: newPage, perPage: 10, searchTerm: searchTerm }),
-    );
-  };
+  const itemsPerPage = 10;
+
+  // Calculate pagination
+  useEffect(() => {
+    const totalItems = data.length;
+    setTotalPages(Math.ceil(totalItems / itemsPerPage));
+  }, [data]);
+
+  // Filter data based on search term
+  const filteredData = React.useMemo(() => {
+    if (!searchTerm) return data;
+    
+    return data.filter((item: any) => {
+      const species = item as Species;
+      return (
+        species.genre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        species.ordre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        species.statut_conservation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        species.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
+  }, [data, searchTerm]);
+
+  // Paginate filtered data
+  const paginatedData = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredData.slice(startIndex, endIndex);
+  }, [filteredData, currentPage]);
 
   const table = useReactTable({
-    data,
+    data: paginatedData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // const [diagOpen, setDiagOpen] = useState(false);
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+  };
 
-  // **Initialize** with the user’s current values
-  const [status, setStatus] = useState("");
-  const [role, setRole] = useState("");
+  // Update species function
+  const updateSpecies = async (updatedSpecies: Species) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/genres/${updatedSpecies.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          genre: editGenre,
+          ordre: editOrdre,
+          statut_conservation: editStatutConservation,
+          description: editDescription,
+        }),
+      });
 
-  // departments list from the slice
-  const allDepts = useSelector((state: any) => state.departments.departments);
-  useEffect(() => {
-    console.log("allDepts:", allDepts);
-  }, [allDepts]);
-  // Track the checkbox selection
-  const [deptIds, setDeptIds] = useState<number[]>([]);
+      if (!response.ok) {
+        throw new Error('Failed to update species');
+      }
 
-  const [selected, setSelected] = useState<User | null>(null);
+      // Close dialog and refresh data
+      setSelected(null);
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Error updating species:', error);
+      // TODO: Show error toast
+    }
+  };
+
+  // Delete species function
+  const deleteSpecies = async (speciesId: number) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/genres/${speciesId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete species');
+      }
+
+      // Close dialog and refresh data
+      setSelected(null);
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Error deleting species:', error);
+      // TODO: Show error toast
+    }
+  };
 
   return (
     <div className="rounded-md border min-h-[400px] flex flex-col">
@@ -145,9 +205,7 @@ export function DataTable<TData, TValue>({
                 ))
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                // Assume the row's original data is of type User.
-                const user = row.original as User;
-                // console.log("ROW:", row);
+                const species = row.original as Species;
                 return (
                   <TableRow
                     key={row.id}
@@ -155,10 +213,12 @@ export function DataTable<TData, TValue>({
                     className="cursor-pointer"
                     onClick={(e: any) => {
                       e.preventDefault();
-                      setSelected(user);
-                      setDeptIds(user.departmentIds);
-                      setStatus(user.status);
-                      setRole(user.role);
+                      setSelected(species);
+                      // Initialize edit form with current values
+                      setEditGenre(species.genre || "");
+                      setEditOrdre(species.ordre || "");
+                      setEditStatutConservation(species.statut_conservation || "");
+                      setEditDescription(species.description || "");
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -178,229 +238,170 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Pas de resultas.
+                  Pas de résultats.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
+
       {/* Pagination area */}
       <div className="p-4 border-t">
-        <div className="flex justify-center items-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrécédent
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (!isLoading) handlePageChange(currentPage - 1);
-                  }}
-                  className={
-                    currentPage === 1 || isLoading
-                      ? "opacity-50 cursor-not-allowed"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink isActive>{currentPage}</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <span className="mx-2">of {totalPages}</span>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationSuivant
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (!isLoading) handlePageChange(currentPage + 1);
-                  }}
-                  className={
-                    currentPage === totalPages || isLoading
-                      ? "opacity-50 cursor-not-allowed"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+        <div className="flex justify-between items-center">
+          <div className="text-sm text-gray-600">
+            Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredData.length)}-{Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length}
+          </div>
+          <div className="flex justify-center items-center">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrécédent
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (!isLoading) handlePageChange(currentPage - 1);
+                    }}
+                    className={
+                      currentPage === 1 || isLoading
+                        ? "opacity-50 cursor-not-allowed"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink isActive>{currentPage}</PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <span className="mx-2">of {totalPages}</span>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationSuivant
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (!isLoading) handlePageChange(currentPage + 1);
+                    }}
+                    className={
+                      currentPage === totalPages || isLoading
+                        ? "opacity-50 cursor-not-allowed"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       </div>
 
+      {/* Edit Species Dialog */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         {selected && (
-          <DialogContent className="dark:bg-transparent backdrop-blur-lg">
+          <DialogContent className="dark:bg-transparent backdrop-blur-lg max-w-md">
             <DialogHeader className="flex justify-center">
               <DialogTitle className="flex justify-center">
-                Edit User {selected?.name}
+                Edit Species {selected?.genre}
               </DialogTitle>
             </DialogHeader>
             <form
               className="space-y-4"
               onSubmit={async (e) => {
                 e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-
-                formData.set("role", role);
-                formData.set("status", status);
-                formData.set("departments", JSON.stringify(deptIds));
-                console.log("SUBMITTING FORM: ", { deptIds, status, role });
-                try {
-                  await updateUserAction(
-                    selected ? [selected] : null,
-                    formData,
-                  );
-                  // setDiagOpen(false);
-                  setSelected(null);
-                  dispatch(
-                    fetchUsers({
-                      page: 1,
-                      perPage: 10,
-                      searchTerm: "",
-                    }),
-                  );
-                } catch (err: any) {
-                  // TODO: show toast/snackbar: err.message
-                  console.error(
-                    "There was an error at updateUserAction: ",
-                    err,
-                  );
+                if (selected) {
+                  await updateSpecies(selected);
                 }
               }}
             >
+              {/* ID (Read-only) */}
               <div>
                 <label className="block text-sm font-medium">ID</label>
-                <Input type="hidden" name="id" value={selected?.id} />
                 <Input
-                  placeholder={selected?.id}
+                  placeholder={selected?.id.toString()}
                   disabled
                   className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium">Created At</label>
-                <Input
-                  type="text"
-                  placeholder={new Date(
-                    selected?.created_at ?? "",
-                  ).toLocaleString()}
-                  disabled
-                  className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100"
-                />
-              </div>
+
               <Separator />
+
+              {/* Genre (nom_scientifique) */}
               <div>
-                <label className="block text-sm font-medium">Name</label>
+                <label className="block text-sm font-medium">Nom Scientifique</label>
                 <Input
                   type="text"
-                  name="name"
-                  defaultValue={selected?.name}
+                  value={editGenre}
+                  onChange={(e) => setEditGenre(e.target.value)}
                   className="mt-1 block w-full border-gray-300 rounded-md"
+                  required
                 />
               </div>
+
+              {/* Ordre */}
               <div>
-                <label className="block text-sm font-medium">Email</label>
+                <label className="block text-sm font-medium">Ordre</label>
                 <Input
-                  type="email"
-                  name="email"
-                  defaultValue={selected?.email}
+                  type="text"
+                  value={editOrdre}
+                  onChange={(e) => setEditOrdre(e.target.value)}
                   className="mt-1 block w-full border-gray-300 rounded-md"
+                  required
                 />
               </div>
+
+              {/* Statut de conservation */}
               <div>
-                <label className="block text-sm font-medium">Status</label>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={selected?.status} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">ACTIVE</SelectItem>
-                    <SelectItem value="DEACTIVATED">DEACTIVATED</SelectItem>
-                    <SelectItem value="SUSPENDED">SUSPENDED</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium">Role</label>
-                <Select value={role} onValueChange={setRole}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={selected?.role} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ADMIN">ADMIN</SelectItem>
-                    <SelectItem value="USER">USER</SelectItem>
-                  </SelectContent>
-                </Select>
+                <label className="block text-sm font-medium">Statut de Conservation</label>
+                <Input
+                  type="text"
+                  value={editStatutConservation}
+                  onChange={(e) => setEditStatutConservation(e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md"
+                  required
+                />
               </div>
 
+              {/* Description */}
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Departments
-                </label>
-
-                <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
-                  {allDepts.map((dep) => {
-                    const checked = deptIds.includes(dep.id);
-                    return (
-                      <div key={dep.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`dep-${dep.id}`}
-                          checked={checked}
-                          onCheckedChange={(c: boolean) => {
-                            setDeptIds((prev) =>
-                              c
-                                ? [...prev, dep.id]
-                                : prev.filter((id) => id !== dep.id),
-                            );
-                          }}
-                        />
-                        <label htmlFor={`dep-${dep.id}`} className="text-sm">
-                          {dep.name}
-                        </label>
-                      </div>
-                    );
-                  })}
-                </div>
+                <label className="block text-sm font-medium">Description</label>
+                <Textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md min-h-[100px]"
+                  required
+                />
               </div>
 
               <Separator />
-              <div className="mb-6">
-                <label className="block text-sm font-medium">
-                  New Password
-                </label>
-                <Input
-                  type="password"
-                  name="password"
-                  placeholder="Enter new password"
-                  className="mt-1 block w-full border-gray-300 rounded-md"
-                />
-              </div>
-              <div className="flex justify-center gap-2 pt-10">
+
+              {/* Action Buttons */}
+              <div className="flex justify-between gap-2 pt-4">
                 <Button
                   type="button"
-                  className="px-4 py-2 rounded bg-background text-foreground border hover:bg-gray-100 hover:text-gray-700"
+                  variant="destructive"
                   onClick={() => {
-                    setSelected(null);
+                    if (selected && confirm('Are you sure you want to delete this species?')) {
+                      deleteSpecies(selected.id);
+                    }
                   }}
+                  className="px-4 py-2"
                 >
-                  Cancel
+                  Delete
                 </Button>
-                {/* <Button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    console.log("selected: ", selected);
-                    console.log("deptIds", deptIds);
-                    console.log("status", status);
-                    console.log("role", role);
-                  }}
-                >
-                  log
-                </Button> */}
-                <Button type="submit" className="px-4 py-2">
-                  Save
-                </Button>
+                
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setSelected(null)}
+                    className="px-4 py-2"
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="px-4 py-2">
+                    Save
+                  </Button>
+                </div>
               </div>
             </form>
           </DialogContent>

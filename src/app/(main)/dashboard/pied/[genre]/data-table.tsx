@@ -41,13 +41,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Maladie type matching your Maladie table schema
-export type Maladie = {
+// Pied type matching your Pied table schema
+export type Pied = {
   id: number;
-  nom_maladie: string;
-  symptomes: string;
-  traitement: string;
   genre_id: number;
+  nom_commun: string;
+  nom_scientifique_ancien?: string;
+  nom_scientifique_nouveau?: string;
+  famille?: string;
+  origine?: string;
+  type?: string;
+  age?: string;
+  exigences?: string;
+  taux_croissance?: string;
+  periode_floraison?: string;
+  periode_fruitification?: string;
+  multiplication?: string;
+  maladie_id?: number;
+  élagage?: string;
+  utilisation?: string;
+  caracteristique_feuillage?: string;
+  cycle_vegetatif?: string;
 };
 
 interface DataTableProps<TData, TValue> {
@@ -67,13 +81,15 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selected, setSelected] = useState<Maladie | null>(null);
+  const [selected, setSelected] = useState<Pied | null>(null);
   
   // Form states for editing
-  const [editNomMaladie, setEditNomMaladie] = useState("");
-  const [editSymptomes, setEditSymptomes] = useState("");
-  const [editTraitement, setEditTraitement] = useState("");
-  const [editGenreId, setEditGenreId] = useState("");
+  const [editNomCommun, setEditNomCommun] = useState("");
+  const [editOrigine, setEditOrigine] = useState("");
+  const [editType, setEditType] = useState("");
+  const [editAge, setEditAge] = useState("");
+  const [editFamille, setEditFamille] = useState("");
+  const [editExigences, setEditExigences] = useState("");
 
   const itemsPerPage = 10;
 
@@ -88,12 +104,12 @@ export function DataTable<TData, TValue>({
     if (!searchTerm) return data;
     
     return data.filter((item: any) => {
-      const maladie = item as Maladie;
+      const pied = item as Pied;
       return (
-        maladie.nom_maladie?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        maladie.symptomes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        maladie.traitement?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        maladie.genre_id?.toString().includes(searchTerm)
+        pied.nom_commun?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pied.origine?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pied.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pied.famille?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     });
   }, [data, searchTerm]);
@@ -116,24 +132,26 @@ export function DataTable<TData, TValue>({
     setCurrentPage(newPage);
   };
 
-  // Update maladie function
-  const updateMaladie = async (updatedMaladie: Maladie) => {
+  // Update pied function
+  const updatePied = async (updatedPied: Pied) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/maladies/${updatedMaladie.id}`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/pieds/${updatedPied.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          nom_maladie: editNomMaladie,
-          symptomes: editSymptomes,
-          traitement: editTraitement,
-          genre_id: parseInt(editGenreId),
+          nom_commun: editNomCommun,
+          origine: editOrigine,
+          type: editType,
+          age: editAge,
+          famille: editFamille,
+          exigences: editExigences,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update maladie');
+        throw new Error('Failed to update pied');
       }
 
       // Close dialog and refresh data
@@ -142,20 +160,20 @@ export function DataTable<TData, TValue>({
         onRefresh();
       }
     } catch (error) {
-      console.error('Error updating maladie:', error);
+      console.error('Error updating pied:', error);
       // TODO: Show error toast
     }
   };
 
-  // Delete maladie function
-  const deleteMaladie = async (maladieId: number) => {
+  // Delete pied function
+  const deletePied = async (piedId: number) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/maladies/${maladieId}`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/pieds/${piedId}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete maladie');
+        throw new Error('Failed to delete pied');
       }
 
       // Close dialog and refresh data
@@ -164,7 +182,7 @@ export function DataTable<TData, TValue>({
         onRefresh();
       }
     } catch (error) {
-      console.error('Error deleting maladie:', error);
+      console.error('Error deleting pied:', error);
       // TODO: Show error toast
     }
   };
@@ -205,7 +223,7 @@ export function DataTable<TData, TValue>({
                 ))
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
-                const maladie = row.original as Maladie;
+                const pied = row.original as Pied;
                 return (
                   <TableRow
                     key={row.id}
@@ -213,12 +231,14 @@ export function DataTable<TData, TValue>({
                     className="cursor-pointer"
                     onClick={(e: any) => {
                       e.preventDefault();
-                      setSelected(maladie);
+                      setSelected(pied);
                       // Initialize edit form with current values
-                      setEditNomMaladie(maladie.nom_maladie || "");
-                      setEditSymptomes(maladie.symptomes || "");
-                      setEditTraitement(maladie.traitement || "");
-                      setEditGenreId(maladie.genre_id?.toString() || "");
+                      setEditNomCommun(pied.nom_commun || "");
+                      setEditOrigine(pied.origine || "");
+                      setEditType(pied.type || "");
+                      setEditAge(pied.age || "");
+                      setEditFamille(pied.famille || "");
+                      setEditExigences(pied.exigences || "");
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -295,13 +315,13 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
-      {/* Edit Maladie Dialog */}
+      {/* Edit Pied Dialog */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         {selected && (
           <DialogContent className="dark:bg-transparent backdrop-blur-lg max-w-md">
             <DialogHeader className="flex justify-center">
               <DialogTitle className="flex justify-center">
-                Edit Maladie {selected?.nom_maladie}
+                Edit Pied {selected?.nom_commun}
               </DialogTitle>
             </DialogHeader>
             <form
@@ -309,7 +329,7 @@ export function DataTable<TData, TValue>({
               onSubmit={async (e) => {
                 e.preventDefault();
                 if (selected) {
-                  await updateMaladie(selected);
+                  await updatePied(selected);
                 }
               }}
             >
@@ -325,49 +345,69 @@ export function DataTable<TData, TValue>({
 
               <Separator />
 
-              {/* Nom Maladie */}
+              {/* Nom Commun */}
               <div>
-                <label className="block text-sm font-medium">Nom Maladie</label>
+                <label className="block text-sm font-medium">Nom Commun</label>
                 <Input
                   type="text"
-                  value={editNomMaladie}
-                  onChange={(e) => setEditNomMaladie(e.target.value)}
+                  value={editNomCommun}
+                  onChange={(e) => setEditNomCommun(e.target.value)}
                   className="mt-1 block w-full border-gray-300 rounded-md"
                   required
                 />
               </div>
 
-              {/* Symptomes */}
+              {/* Origine */}
               <div>
-                <label className="block text-sm font-medium">Symptomes</label>
-                <Textarea
-                  value={editSymptomes}
-                  onChange={(e) => setEditSymptomes(e.target.value)}
-                  className="mt-1 block w-full border-gray-300 rounded-md min-h-[80px]"
-                  required
-                />
-              </div>
-
-              {/* Traitement */}
-              <div>
-                <label className="block text-sm font-medium">Traitement</label>
-                <Textarea
-                  value={editTraitement}
-                  onChange={(e) => setEditTraitement(e.target.value)}
-                  className="mt-1 block w-full border-gray-300 rounded-md min-h-[80px]"
-                  required
-                />
-              </div>
-
-              {/* Genre ID */}
-              <div>
-                <label className="block text-sm font-medium">Genre ID</label>
+                <label className="block text-sm font-medium">Origine</label>
                 <Input
-                  type="number"
-                  value={editGenreId}
-                  onChange={(e) => setEditGenreId(e.target.value)}
+                  type="text"
+                  value={editOrigine}
+                  onChange={(e) => setEditOrigine(e.target.value)}
                   className="mt-1 block w-full border-gray-300 rounded-md"
-                  required
+                />
+              </div>
+
+              {/* Type */}
+              <div>
+                <label className="block text-sm font-medium">Type</label>
+                <Input
+                  type="text"
+                  value={editType}
+                  onChange={(e) => setEditType(e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md"
+                />
+              </div>
+
+              {/* Age */}
+              <div>
+                <label className="block text-sm font-medium">Age</label>
+                <Input
+                  type="text"
+                  value={editAge}
+                  onChange={(e) => setEditAge(e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md"
+                />
+              </div>
+
+              {/* Famille */}
+              <div>
+                <label className="block text-sm font-medium">Famille</label>
+                <Input
+                  type="text"
+                  value={editFamille}
+                  onChange={(e) => setEditFamille(e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md"
+                />
+              </div>
+
+              {/* Exigences */}
+              <div>
+                <label className="block text-sm font-medium">Exigences</label>
+                <Textarea
+                  value={editExigences}
+                  onChange={(e) => setEditExigences(e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md min-h-[60px]"
                 />
               </div>
 
@@ -379,8 +419,8 @@ export function DataTable<TData, TValue>({
                   type="button"
                   variant="destructive"
                   onClick={() => {
-                    if (selected && confirm('Are you sure you want to delete this maladie?')) {
-                      deleteMaladie(selected.id);
+                    if (selected && confirm('Are you sure you want to delete this pied?')) {
+                      deletePied(selected.id);
                     }
                   }}
                   className="px-4 py-2"

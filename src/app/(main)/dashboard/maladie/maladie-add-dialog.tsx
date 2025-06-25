@@ -11,27 +11,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
 
-interface SpeciesAddDialogProps {
-  onSpeciesCreated?: (species: any) => void;
+interface MaladieAddDialogProps {
+  onMaladieCreated?: (maladie: any) => void;
 }
 
-export function SpeciesAddDialog({ onSpeciesCreated }: SpeciesAddDialogProps) {
+export function MaladieAddDialog({ onMaladieCreated }: MaladieAddDialogProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="bg-green-600 hover:bg-green-700 text-white h-10 px-8 font-medium">
-          Ajouter
+          ADD
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-center">
-            Ajouter une nouvelle maladie
+            Add New Maladie
           </DialogTitle>
         </DialogHeader>
 
@@ -42,21 +41,21 @@ export function SpeciesAddDialog({ onSpeciesCreated }: SpeciesAddDialogProps) {
             const formData = new FormData(e.currentTarget);
 
             try {
-              // Create species object from form data
-              const newSpecies = {
-                nom_scientifique: formData.get("nom_scientifique") as string,
-                ordre: formData.get("ordre") as string,
-                statut_conservation: formData.get("statut_conservation") as string,
-                description: formData.get("description") as string,
+              // Create maladie object from form data
+              const newMaladie = {
+                nom_maladie: formData.get("nom_maladie") as string,
+                symptomes: formData.get("symptomes") as string,
+                traitement: formData.get("traitement") as string,
+                genre_id: parseInt(formData.get("genre_id") as string),
               };
 
-              // TODO: Call your API to create the species
-              // const result = await createSpeciesAction(newSpecies);
+              // TODO: Call your API to create the maladie
+              // const result = await createMaladieAction(newMaladie);
               
-              console.log("Creating species:", newSpecies);
+              console.log("Creating maladie:", newMaladie);
               
-              if (onSpeciesCreated) {
-                onSpeciesCreated(newSpecies);
+              if (onMaladieCreated) {
+                onMaladieCreated(newMaladie);
               }
               
               setOpen(false);
@@ -64,62 +63,61 @@ export function SpeciesAddDialog({ onSpeciesCreated }: SpeciesAddDialogProps) {
               // Reset form
               e.currentTarget.reset();
             } catch (err) {
-              console.error("Error creating species:", err);
+              console.error("Error creating maladie:", err);
               // TODO: show error toast/notification
             }
           }}
         >
-          {/* Nom_scientifique Field */}
+          {/* nom_maladie Field */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              Nom_scientifique
+              nom_maladie
             </label>
             <Input
-              name="nom_scientifique"
+              name="nom_maladie"
               type="text"
-              placeholder="Enter scientific name"
+              placeholder="Enter disease name"
               className="w-full"
               required
             />
           </div>
 
-          {/* Ordre Field */}
+          {/* symptomes Field */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              Ordre
-            </label>
-            <Input
-              name="ordre"
-              type="text"
-              placeholder="Enter order"
-              className="w-full"
-              required
-            />
-          </div>
-
-          {/* Statut de conservation Field */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Statut de conservation
-            </label>
-            <Input
-              name="statut_conservation"
-              type="text"
-              placeholder="Enter conservation status"
-              className="w-full"
-              required
-            />
-          </div>
-
-          {/* Description Field */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Description
+              symptomes
             </label>
             <Textarea
-              name="description"
-              placeholder="Enter description"
-              className="w-full min-h-[100px] resize-none"
+              name="symptomes"
+              placeholder="Enter symptoms"
+              className="w-full min-h-[80px] resize-none"
+              required
+            />
+          </div>
+
+          {/* traitement Field */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              traitement
+            </label>
+            <Textarea
+              name="traitement"
+              placeholder="Enter treatment"
+              className="w-full min-h-[80px] resize-none"
+              required
+            />
+          </div>
+
+          {/* genre_id Field */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              genre_id
+            </label>
+            <Input
+              name="genre_id"
+              type="number"
+              placeholder="Enter genre ID"
+              className="w-full"
               required
             />
           </div>

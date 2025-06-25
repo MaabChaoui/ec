@@ -1,158 +1,113 @@
-// // app/dashboard/page.tsx
-// "use client";
-
-// import React, { useEffect, useRef, useState } from "react";
-// // import { useDispatch, useSelector } from "react-redux";
-// import { useAppDispatch, useAppSelector } from "@/store/store";
-// // import { AppDispatch, RootState } from "../../lib/store";
-// import { fetchUsers } from "../../../../store/features/usersSlice";
-// import { setSearchTerm } from "../../../../store/features/usersSlice";
-// import { columns } from "./columns";
-// import { DataTable } from "./data-table";
-// import DashboardHeader from "../../../../components/dashboard/dashboardHeader";
-// import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-// import { Input } from "@/components/ui/input";
-// import { Filter } from "lucide-react";
-// import { Search } from "lucide-react";
-// import { fetchDepartments } from "../../../../store/features/departmentsSlice";
-
-// export default function DemoPage() {
-//   const dispatch = useAppDispatch();
-//   const { users, loading, error, currentPage, totalPages, searchTerm } =
-//     useAppSelector((state) => state.users);
-
-//   const perPage = 10;
-//   const [localSearch, setLocalSearch] = useState("");
-//   const debounceTimer = useRef<NodeJS.Timeout>();
-
-//   useEffect(() => {
-//     // Debounce search input
-//     if (debounceTimer.current) clearTimeout(debounceTimer.current);
-
-//     debounceTimer.current = setTimeout(() => {
-//       dispatch(setSearchTerm(localSearch));
-//     }, 500);
-
-//     return () => {
-//       if (debounceTimer.current) clearTimeout(debounceTimer.current);
-//     };
-//   }, [localSearch, dispatch]);
-
-//   useEffect(() => {
-//     dispatch(fetchDepartments());
-//   }, [dispatch]);
-
-//   useEffect(() => {
-//     dispatch(fetchUsers({ page: 1, perPage: perPage, searchTerm: searchTerm }));
-//   }, [dispatch, searchTerm]);
-
-//   const data = [];
-//   const table = useReactTable({
-//     data,
-//     columns,
-//     getCoreRowModel: getCoreRowModel(),
-//   });
-
-//   const [isSearchVisible, setIsSearchVisible] = useState(false);
-//   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
-
-//   return (
-//     <div className="container mx-auto py-10">
-//       <DashboardHeader />
-//       {/* Search Bar Container */}
-//       <div className="flex bg-red-500 items-center gap-2 mb-4">
-//         <button
-//           onClick={() => setIsSearchVisible(!isSearchVisible)}
-//           className="p-2 hover:bg-accent rounded-full transition-colors"
-//         >
-//           <Search className="h-5 w-5" />
-//         </button>
-
-//         <div
-//           className={`
-//           relative overflow-hidden
-//           transition-all duration-300 ease-in-out
-//           ${isSearchVisible ? "max-w-sm opacity-100" : "max-w-0 opacity-0"}
-//         `}
-//         >
-//           <div className="flex items-center w-full space-x-2 rounded-lg border border-gray-300 bg-gray-50 dark:bg-sidebar">
-//             <Input
-//               type="search"
-//               placeholder="Search"
-//               className="w-full border-0 h-8 font-semibold"
-//               value={localSearch}
-//               onChange={(e) => setLocalSearch(e.target.value)}
-//             />
-//           </div>
-//         </div>
-//         <button
-//           onClick={() => {
-//             setIsFiltersVisible(!isFiltersVisible);
-//           }}
-//           className="hover:bg-accent rounded-full p-2"
-//         >
-//           <Filter className="h-5 w-5"></Filter>
-//         </button>
-//         <div
-//           className={`
-//           relative overflow-hidden
-//           transition-all duration-300 ease-in-out
-//           ${isFiltersVisible ? "max-w-sm opacity-100" : "max-w-0 opacity-0"}
-//         `}
-//         >
-//           <div className="italic w-30 gap-2 flex-row flex">
-//             <div className="w-[50px] bg-accent h-2 rounded-full"></div>
-//             <div className="w-[20px] bg-accent h-2 rounded-full"></div>
-//             <div className="w-[60px] bg-accent h-2 rounded-full"></div>
-//             <div className="w-[90px] bg-accent h-2 rounded-full"></div>
-//             <div className="w-[50px] bg-accent h-2 rounded-full"></div>
-//           </div>
-//         </div>
-//         <div className="bg-blue-500">grdgr</div>
-//       </div>
-//       <DataTable
-//         columns={columns}
-//         data={users}
-//         isLoading={loading} // Pass loading state
-//       />
-//     </div>
-//   );
-// }
-
 "use client";
 
-import { useState } from "react";
-import { SpeciesHeader } from "./species-header";
-// import { SpeciesHeader } from "./species-header";
+import { useState, useEffect } from "react";
+import { MaladieHeader } from "./maladie-header";
 import { DataTable } from "./data-table";
-import { columns } from "./columns";
+import { columns, Maladie } from "./columns";
 
-export default function SpeciesPage() {
+export default function MaladiePage() {
+  // Data state
+  const [maladies, setMaladies] = useState<Maladie[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  
   // Filter states
   const [dateFilter, setDateFilter] = useState("all");
   const [orderTypeFilter, setOrderTypeFilter] = useState("all");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
-  
-  // Your existing states
-  const [users, setUsers] = useState([]); // Replace with species data
-  const [loading, setLoading] = useState(false);
 
-  const handleAddSpecies = () => {
-    // Handle add new species
-    console.log("Add new species");
+  // Fetch maladies from backend
+  const fetchMaladies = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/maladies/');
+      if (!response.ok) {
+        throw new Error('Failed to fetch maladies');
+      }
+      const data = await response.json();
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setMaladies(data);
+      } else if (data && Array.isArray(data.results)) {
+        // Handle paginated response
+        setMaladies(data.results);
+      } else {
+        console.error('Unexpected data format:', data);
+        setMaladies([]);
+      }
+    } catch (error) {
+      console.error('Error fetching maladies:', error);
+      setMaladies([]); // Set empty array on error
+      // TODO: Show error toast
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchMaladies();
+  }, []);
+
+  // Create new maladie
+  const handleMaladieCreated = async (newMaladieData: any) => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/maladies/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nom_maladie: newMaladieData.nom_maladie,
+          symptomes: newMaladieData.symptomes,
+          traitement: newMaladieData.traitement,
+          genre_id: newMaladieData.genre_id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create maladie');
+      }
+
+      // Refresh the data
+      await fetchMaladies();
+    } catch (error) {
+      console.error('Error creating maladie:', error);
+      // TODO: Show error toast
+    }
   };
 
   const handleResetFilters = () => {
     setDateFilter("all");
     setOrderTypeFilter("all");
     setOrderStatusFilter("all");
-    // Also reset any applied filters on your data
+    setSearchTerm("");
   };
+
+  // Apply filters to data
+  const filteredMaladies = Array.isArray(maladies) ? maladies.filter((item) => {
+    // Apply search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = 
+        item.nom_maladie?.toLowerCase().includes(searchLower) ||
+        item.symptomes?.toLowerCase().includes(searchLower) ||
+        item.traitement?.toLowerCase().includes(searchLower) ||
+        item.genre_id?.toString().includes(searchLower);
+      
+      if (!matchesSearch) return false;
+    }
+
+    // Apply other filters here if needed
+    // For now, we'll just return true since the backend data doesn't have date/order info
+    return true;
+  }) : [];
 
   return (
     <div className="container mx-auto py-10">
-      <SpeciesHeader
-        onAddClick={handleAddSpecies}
+      <MaladieHeader
+        onMaladieCreated={handleMaladieCreated}
         onResetFilters={handleResetFilters}
         dateFilter={dateFilter}
         orderTypeFilter={orderTypeFilter}
@@ -162,10 +117,23 @@ export default function SpeciesPage() {
         onOrderStatusFilterChange={setOrderStatusFilter}
       />
       
+      {/* Search Bar */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search maladies..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-md w-full max-w-md"
+        />
+      </div>
+      
       <DataTable
         columns={columns}
-        data={users} // Replace with species data
+        data={filteredMaladies}
         isLoading={loading}
+        searchTerm={searchTerm}
+        onRefresh={fetchMaladies}
       />
     </div>
   );

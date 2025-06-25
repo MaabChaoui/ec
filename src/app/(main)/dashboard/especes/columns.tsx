@@ -2,14 +2,15 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink, Trash2, TreePine } from "lucide-react";
+import Link from "next/link";
 
-// Define the Species type based on your Figma design
+// Define the Species type based on your Genre table schema
 export type Species = {
-  id: string;
-  nom_scientifique: string;
+  id: number;
+  genre: string; // This is the nom_scientifique from your design
   ordre: string;
-  stat_conservation: string;
+  statut_conservation: string;
   description: string;
 };
 
@@ -18,12 +19,12 @@ export const columns: ColumnDef<Species>[] = [
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => {
-      const id: string = row.getValue("id");
-      return <span className="font-mono text-sm">{id}</span>;
+      const id: number = row.getValue("id");
+      return <span className="font-mono text-sm">{String(id).padStart(5, '0')}</span>;
     },
   },
   {
-    accessorKey: "nom_scientifique",
+    accessorKey: "genre",
     header: "Nom_scientifique",
   },
   {
@@ -31,7 +32,7 @@ export const columns: ColumnDef<Species>[] = [
     header: "Ordre",
   },
   {
-    accessorKey: "stat_conservation", 
+    accessorKey: "statut_conservation", 
     header: "Stat-Consr",
   },
   {
@@ -42,15 +43,24 @@ export const columns: ColumnDef<Species>[] = [
     id: "action",
     header: "ACTION",
     cell: ({ row }) => {
+      const species = row.original;
+      // Create a URL-friendly slug from the species name
+      const speciesSlug = species.genre?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'unknown';
+      
       return (
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 hover:bg-gray-100"
-          >
-            <ExternalLink className="h-4 w-4 text-gray-600" />
-          </Button>
+          {/* View Pied button - navigates to /pied/[species-name] */}
+          <Link href={`/dashboard/pied/${speciesSlug}`} passHref>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e:any)=>{e.stopPropagation()}}
+              className="h-8 w-8 p-0 hover:bg-green-50"
+              title={`View ${species.genre} plants`}
+            >
+              <TreePine className="h-4 w-4 text-green-600" />
+            </Button>
+          </Link>
           <Button
             variant="ghost"
             size="sm"

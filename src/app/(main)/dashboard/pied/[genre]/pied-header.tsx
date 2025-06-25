@@ -6,11 +6,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Filter, RotateCcw, ChevronDown } from "lucide-react";
-import { SpeciesAddDialog } from "./species-add-dialog";
+import { Filter, RotateCcw } from "lucide-react";
+import { PiedAddDialog } from "./pied-add-dialog";
 
-interface SpeciesHeaderProps {
-  onSpeciesCreated?: (species: any) => void;
+interface PiedHeaderProps {
+  genreSlug: string;
+  genreId?: number;
+  onPiedCreated?: (pied: any) => void;
   onResetFilters?: () => void;
   // Filter state props
   dateFilter: string;
@@ -21,8 +23,10 @@ interface SpeciesHeaderProps {
   onOrderStatusFilterChange: (value: string) => void;
 }
 
-export function SpeciesHeader({
-  onSpeciesCreated,
+export function PiedHeader({
+  genreSlug,
+  genreId,
+  onPiedCreated,
   onResetFilters,
   dateFilter,
   orderTypeFilter,
@@ -30,11 +34,17 @@ export function SpeciesHeader({
   onDateFilterChange,
   onOrderTypeFilterChange,
   onOrderStatusFilterChange,
-}: SpeciesHeaderProps) {
+}: PiedHeaderProps) {
+  // Convert slug back to readable name
+  const genreName = genreSlug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
   return (
     <div className="mb-8">
       {/* Page Title */}
-      <h1 className="text-3xl font-semibold text-gray-900 mb-8">Maladie</h1>
+      <h1 className="text-3xl font-semibold text-gray-900 mb-8">{genreName}</h1>
       
       {/* Filter Controls Row - matches the gray background container in the image */}
       <div className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
@@ -51,8 +61,8 @@ export function SpeciesHeader({
           {/* Date Filter */}
           <div className="relative">
             <Select value={dateFilter} onValueChange={onDateFilterChange}>
-              <SelectTrigger className="w-[100px] h-10 bg-white border-gray-200 text-sm">
-                <SelectValue placeholder="Date" />
+              <SelectTrigger className="w-[120px] h-10 bg-white border-gray-200 text-sm">
+                <SelectValue placeholder="14 Feb 2019" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Dates</SelectItem>
@@ -60,6 +70,9 @@ export function SpeciesHeader({
                 <SelectItem value="week">This Week</SelectItem>
                 <SelectItem value="month">This Month</SelectItem>
                 <SelectItem value="year">This Year</SelectItem>
+                <SelectItem value="2019">2019</SelectItem>
+                <SelectItem value="2020">2020</SelectItem>
+                <SelectItem value="2021">2021</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -89,11 +102,11 @@ export function SpeciesHeader({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="processing">Processing</SelectItem>
-                <SelectItem value="shipped">Shipped</SelectItem>
-                <SelectItem value="delivered">Delivered</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="young">Young</SelectItem>
+                <SelectItem value="mature">Mature</SelectItem>
+                <SelectItem value="old">Old</SelectItem>
+                <SelectItem value="flowering">Flowering</SelectItem>
+                <SelectItem value="dormant">Dormant</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -110,8 +123,8 @@ export function SpeciesHeader({
           </Button>
         </div>
 
-        {/* Right side - Ajouter Dialog */}
-        <SpeciesAddDialog onSpeciesCreated={onSpeciesCreated} />
+        {/* Right side - Add new pied button */}
+        <PiedAddDialog genreId={genreId} onPiedCreated={onPiedCreated} />
       </div>
     </div>
   );
